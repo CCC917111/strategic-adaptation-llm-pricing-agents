@@ -2,7 +2,7 @@
 
 *Pricing behavior, persistent memory, and collusive dynamics under changing market conditions*
 
-> **Project status:** research scaffold. The broad problem is stable; the final research question, contribution claim, and paper title remain open.
+> **Project status:** preliminary experiments completed; the next study is being redesigned around controlled interventions. The final contribution claim and paper title remain open.
 
 ## Project overview
 
@@ -46,7 +46,7 @@ reasoning, persistent memory, monitorability, and oversight
 open question: adaptation and path dependence under regime change
 ```
 
-See the full [literature review](docs/literature-review.md) and [structured reading list](docs/reading-list.md).
+See the full [literature review](docs/literature-review.md), [structured reading list](docs/reading-list.md), and [preliminary experiment report](docs/preliminary-experiments.md).
 
 ## Open research gap
 
@@ -69,6 +69,8 @@ These questions are candidates, not settled claims.
 
 ## Current experimental directions
 
+The existing implementation and preliminary runs reproduce a repeated two-firm logit-pricing environment with passive, revision, and veto oversight. They also compare the paper's output-field order with a price-last treatment. These runs exposed strong behavioral inertia and weak endogenous exploration, so the next experiment will not rely on unconstrained free-form price search alone.
+
 | Stage | Design | Purpose |
 |---|---|---|
 | Experiment 0 | Static growth vs. mature markets | Preliminary characterization; not the main contribution |
@@ -76,6 +78,8 @@ These questions are candidates, not settled claims.
 | Experiment 2 | Carry vs. reset vs. sanitize persistent notes | Estimate whether explicit memory causally affects adaptation |
 | Experiment 3 | Controlled unilateral price deviation | Probe punishment, recovery, and competitor-contingent policies |
 | Experiment 4 | Public/private/behavioral channel comparison | Evaluate faithfulness and predictive value of agent-generated text |
+
+Current settings, results, API details, caveats, and the reason for changing methods are documented in [Preliminary experiments](docs/preliminary-experiments.md). A compact machine-readable table is in [results/preliminary-results.csv](results/preliminary-results.csv).
 
 The core counterfactual is:
 
@@ -94,10 +98,14 @@ Detailed hypotheses, measurements, controls, and interpretable null results are 
 ├── README.md
 ├── docs/
 │   ├── literature-review.md
+│   ├── preliminary-experiments.md
 │   ├── reading-list.md
 │   └── research-agenda.md
-├── experiments/          # experiment definitions and code (TBD)
-├── results/              # generated outputs; large/raw artifacts ignored
+├── experiments/
+│   └── README.md         # reproducibility notes and run profiles
+├── results/
+│   └── preliminary-results.csv
+├── src/                  # sanitized core implementation
 └── references/
     └── references.bib
 ```
