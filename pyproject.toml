@@ -3,23 +3,20 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "llm-pricing-oversight"
+name = "strategic-adaptation-llm-pricing-agents"
 version = "0.1.0"
-description = "Reproduction code for an LLM pricing-agent oversight experiment"
+description = "Experiments on LLM pricing adaptation under hidden demand change"
 requires-python = ">=3.11"
 
 [project.optional-dependencies]
-openai = [
-    "openai",
-    "pydantic>=2",
-]
 gemini = [
     "google-genai>=2.3.0",
     "pydantic>=2",
 ]
-plot = [
-    "matplotlib>=3.9",
-]
+test = ["pytest>=8"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
