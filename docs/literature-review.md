@@ -1,138 +1,54 @@
-# Literature Review
+# Related Work
 
-## Scope and framing
+This review asks one narrow question: what does prior work tell us about interpreting the prices produced by adaptive pricing agents, and what is still unknown when an LLM agent faces hidden demand change during deployment?
 
-This review frames pricing as a multi-agent AI problem. An agent's action changes the observations, rewards, and future policy updates of other agents, so the environment is not stationary from any individual learner's perspective. The economic model supplies controlled incentives and measurable equilibria; the research target is the behavior of interacting adaptive systems.
+## 1. High prices can emerge, but the mechanism is disputed
 
-The review is organized by conceptual transitions rather than chronology.
+[Calvano et al. (2020)](https://doi.org/10.1257/aer.20190623) showed that independent Q-learning pricing agents can reach prices above the one-shot Nash equilibrium without communicating. After an exogenous deviation, their learned policies often cut prices and later return to the previous level. This supplied influential evidence that repeated interaction between learning algorithms can produce behavior resembling tacit collusion.
 
-## 1. From algorithmic pricing to multi-agent learning
+Later work showed why the price level and a punishment-looking path are not sufficient evidence of collusion. [Calvano et al. (2023)](https://doi.org/10.1016/j.ijindorg.2023.102973) distinguish genuine reward–punishment strategies from spurious high-price outcomes created by the learning process. [Asker, Fershtman, and Pakes (2024)](https://doi.org/10.1111/jems.12516) show that the information and feedback available to a learning algorithm can materially change its pricing outcome. [Banchio and Mantegazza](https://arxiv.org/abs/2202.05946) identify statistical coupling between independently learning agents as another route to coordinated behavior. [Epivent and Lambin (2024)](https://doi.org/10.1016/j.econlet.2024.111661) further show that responses interpreted as punishment may also follow upward deviations.
 
-Automated pricing is shifting from static rules toward agents that observe market outcomes and repeatedly update decisions. Once multiple adaptive agents interact, pricing is no longer well described as independent stochastic optimization. Each learner changes the effective objective and data-generating process faced by the others.
+The conclusion relevant to this project is straightforward: a stable price above a competitive benchmark is an observation, not a mechanism. Identifying collusion requires evidence about how an agent responds to deviations and what sustains the outcome.
 
-[Bichler, Durmann, and Oberlechner (2025)](https://doi.org/10.1007/s12599-025-00965-z) place the topic at the intersection of online learning, learning in games, and electronic market design. Their review emphasizes that no comprehensive theory currently predicts when interacting algorithms converge to competitive equilibria, supracompetitive outcomes, cycles, or other dynamics. [Abada et al. (2025)](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4891033) similarly argue that results should be evaluated by whether they establish robust, persistent risks relevant beyond a single simulation design.
+## 2. LLM pricing agents make short-run adaptation part of the problem
 
-This motivates an agent-centric framing:
+LLM pricing agents differ from Q-learning agents because they begin with a pretrained policy and make decisions from instructions, natural-language context, interaction history, and sometimes persistent notes. They need not learn a pricing table through millions of numerical updates.
 
-```text
-market outcome is an emergent property of agent × environment interaction
-```
+[Fish, Gonczarowski, and Shorrer](https://arxiv.org/abs/2404.00806) find that LLM pricing agents can reach supracompetitive prices within relatively short repeated interactions. Their results also show that prompt wording matters and use off-path tests to examine whether agents anticipate price wars. This shifts part of the research problem from long-run learning dynamics to deployment-time behavior: what information is in the prompt, what history is retained, and how the agent reacts within a finite run.
 
-## 2. Classical reinforcement learning and supracompetitive pricing
+[Algorithmic Collusion at Test Time](https://arxiv.org/abs/2602.17203) makes this distinction explicit by studying the combination of a pretrained policy and an in-game adaptation rule. Its focus on finite horizons, strategic diversity, and asymmetric settings is directly relevant to experiments in which an LLM must infer an environment while acting in it.
 
-[Calvano et al. (2020)](https://doi.org/10.1257/aer.20190623) provide the foundational experimental result. Independent Q-learning agents in a repeated oligopoly model learned prices above the one-shot Nash equilibrium without explicit communication. Their off-equilibrium responses resembled a finite punishment phase followed by a gradual return to cooperation. The result also survived several changes in cost, demand, player count, and uncertainty.
+For the present study, the implication is that the prompt and memory loop are part of the experimental treatment. A high or stable price may reflect strategic interaction, but it may also reflect an early heuristic that the LLM keeps reusing because observed profit has not fallen.
 
-The canonical empirical pattern became:
+## 3. Robustness depends on the interaction setting
 
-```text
-repeated interaction
-→ supracompetitive prices
-→ deviation response
-→ punishment and recovery
-```
+Recent research tests whether high-price LLM outcomes survive changes that make the environment less symmetric or less controlled. [Keppo et al.](https://arxiv.org/abs/2603.20281) find that differences in patience and data access, additional competitors, and interaction with a different algorithm can weaken coordination; some model-size differences instead produce leader–follower behavior. [Agrawal et al.](https://arxiv.org/abs/2507.01413) study LLM agents in continuous double auctions and report sensitivity to model choice, communication, oversight, and environmental pressure.
 
-This work established the phenomenon, but it did not settle how to identify the mechanism.
+This work changes the appropriate empirical standard. A result from one model, prompt, market, or opponent composition should not be treated as a general property of LLM agents. The environment must be varied through controlled comparisons, and run-to-run variation must be reported.
 
-## 3. Genuine versus spurious collusion
+Studies of demand shocks in reinforcement-learning pricing environments, including [Algorithmic Collusion under Observed Demand Shocks](https://arxiv.org/abs/2502.15084), show that nonstationary demand is already an important part of the broader algorithmic-pricing literature. They do not remove the LLM-specific question considered here, because an LLM's pretrained policy, language context, and persistent scratchpad create a different adaptation process.
 
-High prices are an outcome, not a mechanism. [Calvano et al. (2023)](https://doi.org/10.1016/j.ijindorg.2023.102973) distinguish **genuine collusion**, in which supracompetitive outcomes are sustained by strategic reward–punishment behavior, from **spurious collusion**, in which a learning process settles on inefficiently high prices even where collusion is impossible or not an equilibrium.
+## 4. Reasoning, memory, and oversight are evidence channels, not ground truth
 
-Several papers sharpen this identification problem:
+LLM agents produce public explanations, structured self-reports, and private notes in addition to actions. These outputs are useful because they can be compared with later behavior, but they should not automatically be treated as faithful descriptions of the policy that generated a price.
 
-- [Asker, Fershtman, and Pakes (2024)](https://doi.org/10.1111/jems.12516) show that pricing outcomes depend on the learning protocol and on what counterfactual feedback the agent receives.
-- [Banchio and Mantegazza (2022/working paper)](https://arxiv.org/abs/2202.05946) identify **spontaneous coupling**, an endogenous statistical linkage between learners' estimates that can support coordinated outcomes.
-- [Epivent and Lambin (2024)](https://doi.org/10.1016/j.econlet.2024.111661) show that apparent price wars can follow upward as well as downward deviations, weakening a simple punishment interpretation.
-- [Arunachaleswaran et al. (2025)](https://doi.org/10.4230/LIPIcs.ITCS.2025.10) show that near-monopoly outcomes can arise in algorithm space without explicitly encoded threats, suggesting that threat-based definitions may be too narrow.
+The project's core manuscript, *Oversight Is Not Compliance* (public citation metadata TBD), separates executed prices, public justifications, competitor-information disclosures, and persistent private notes. It reports that compliant language and self-disclosure can diverge from pricing behavior. Persistent notes may help an agent carry a plan across rounds, but reading those notes does not by itself show that the text caused the subsequent action.
 
-The methodological conclusion is central to this project:
+This distinction matters for the current results. The frequent “maintain” language in the saved notes is consistent with price inertia, but it is only supporting evidence. The primary evidence remains the executed price path and the agent's response to changing realized outcomes.
 
-> Supracompetitive pricing alone is insufficient to identify the strategic policy that generated it.
+## 5. Position of the current study
 
-Accordingly, the project will pair price-level metrics with controlled perturbations, response curves, recovery dynamics, and memory interventions.
+Prior work establishes four points: adaptive pricing agents can produce high prices; high prices do not identify a collusive mechanism; LLM behavior is sensitive to prompts and finite interaction history; and robustness must be tested across environments and runs.
 
-## 4. From trained RL policies to LLM pricing agents
+The current experiment applies those lessons to a hidden numerical path of gradual demand expansion. Mature and expanding markets use the same model, base economic parameters, observation structure, and oversight mode. The expanding treatment changes common product attractiveness over rounds 1–40. Agents receive a qualitative market-phase description but are not told the demand equation, rate, or current demand level. They must infer the magnitude of change from realized quantity and profit.
 
-LLM agents enter the market with pretrained general-purpose policies and can adapt during deployment through instructions, history, tool use, and natural-language memory. This differs from classical experiments in which a numerical policy is acquired over very long training horizons.
+The analysis therefore asks two concrete questions:
 
-[Fish, Gonczarowski, and Shorrer (2024; revised 2026)](https://arxiv.org/abs/2404.00806) show that LLM-based pricing agents can rapidly reach supracompetitive prices in repeated oligopoly environments without explicit communication. Small prompt changes materially affect the outcomes, and off-path analysis implicates concern about price wars. The result makes prompt and scaffold design part of the strategic environment.
+1. Do raw prices rise when hidden demand expands?
+2. Do prices keep pace with the round-specific competitive and joint-profit benchmarks, or remain anchored near an early value?
 
-[Luo, Schoepflin, and Wang (2026)](https://arxiv.org/abs/2602.17203) move the discussion toward **test-time collusion**. Their meta-game combines a pretrained initial policy with an in-game adaptation rule and evaluates strategies under finite interaction horizons, strategic diversity, and asymmetric settings. This reframes the central question from whether an algorithm can eventually learn a collusive equilibrium to how an already capable agent adapts during deployment.
+This design does not claim that any high price is collusive. Its immediate purpose is to measure adaptation under hidden nonstationarity and to determine whether the strong inertia seen in the current runs requires a different experimental method. The final contribution statement remains TBD.
 
-[EconEvals (Fish et al., 2025)](https://arxiv.org/abs/2503.18825) provides a broader evaluation context: LLM agents can be studied as decision-makers that must explore and learn unknown environments over multiple turns, not merely as text models answering static questions.
+## Writing principle used in this review
 
-## 5. Robustness beyond symmetric stationary benchmarks
-
-Early symmetric benchmarks isolate behavior cleanly, but they can make coordination easier than realistic deployment conditions do. Recent work therefore varies agent composition, information access, market structure, and interaction protocols.
-
-[Keppo et al. (2026)](https://arxiv.org/abs/2603.20281) find that LLM-agent collusion is fragile to several realistic forms of heterogeneity. Differences in patience and data access reduce price lift; more competitors and LLM–Q-learning interaction can break coordination. Model-size heterogeneity, however, can create leader–follower dynamics rather than eliminate collusion.
-
-[Agrawal et al. (2025)](https://arxiv.org/abs/2507.01413) extend the setting to continuous double auctions, showing sensitivity to communication, model choice, oversight, and environmental pressure. [Collina, Arunachaleswaran, and Jagadeesan (2025)](https://arxiv.org/abs/2511.21935) analyze mixed human–AI pricing ecosystems and show theoretically that even limited defection by human/no-regret actors can destabilize high-price outcomes.
-
-These papers support a stronger synthesis than a list of parameters:
-
-```text
-collusive behavior is conditional on
-model × scaffold × information × opponents × environment × history
-```
-
-However, most robustness work varies conditions across agents or independent runs. Temporal heterogeneity—how the same agent carries strategic state from one regime into another—remains a distinct target.
-
-## 6. Reasoning, persistent memory, and oversight
-
-LLM agents expose natural-language channels that classical pricing algorithms do not. Public explanations, self-reports, and private notes can be compared with behavior. Persistent notes are especially important because they are not only reports: when fed back into later rounds, they are part of the agent's effective state.
-
-The core project paper, ***Oversight Is Not Compliance*** (citation metadata TBD), separates executed prices, public justifications, self-disclosures, and persistent private notes in a repeated pricing environment. Its central observation is that these channels can diverge: compliance-oriented public language need not imply a compliant pricing policy; private notes may track competitors or oversight thresholds that public explanations omit; and self-reported competitor influence can be unreliable. The paper treats persistent notes as a mechanism for maintaining strategy across rounds while acknowledging that textual strategy labels do not directly reveal an internal causal mechanism.
-
-This creates the project's most natural extension:
-
-```text
-prior work: notes as diagnostic evidence
-this project: notes as a manipulable candidate state variable
-```
-
-Rather than infer causality from note content, the project can reset, sanitize, or edit memory and measure downstream behavior. A null intervention is informative: it may indicate that the text is epiphenomenal or that strategic state is carried elsewhere in the interaction history.
-
-The wider multi-agent context strengthens the importance of this question. Anthropic's [*Patterns and problems in emerging multiagent systems* (2026)](https://www.anthropic.com/research/multiagent-systems) reports coordination failures, conformity, collusion, epistemic failures, and conflict escalation in groups of agents. It argues that individually capable or aligned agents need not compose into well-behaved systems. Pricing offers a compact, measurable environment in which to study the same composition problem.
-
-## 7. Open research gap
-
-The literature establishes that:
-
-1. adaptive pricing algorithms and LLM agents can generate supracompetitive outcomes;
-2. price level alone does not distinguish genuine strategic coordination from other learning dynamics;
-3. LLM-agent behavior depends on prompt, model, information, opponent, and market structure;
-4. test-time adaptation is a practical evaluation target; and
-5. natural-language reasoning and memory may be only weakly coupled to behavior.
-
-What remains less understood is how an LLM pricing agent adapts when the environment itself changes over time, and whether accumulated strategic state causes path dependence after the transition.
-
-The clean counterfactual is not simply growth versus mature markets. It is:
-
-```text
-same final market
-+ same model and task
-+ different prior regime or retained memory
-→ compare post-transition policies
-```
-
-This distinguishes effects of current fundamentals from effects of history and memory.
-
-## 8. Proposed introduction structure
-
-A paper introduction can be built in five paragraphs:
-
-1. **Autonomous pricing as multi-agent learning:** adaptive agents alter one another's environment and can create unprogrammed system-level behavior.
-2. **Classical evidence and identification dispute:** RL agents reach high prices, but high prices do not by themselves establish genuine collusion.
-3. **LLM and test-time shift:** pretrained agents adapt through prompts, reasoning, history, and memory during finite deployment interactions.
-4. **Robustness and oversight:** behavior depends on the interaction setting, while observable reasoning may not faithfully reveal policy.
-5. **Open problem and project:** study adaptation, memory, and strategic response under controlled regime transitions; final contribution statement TBD.
-
-## 9. Contribution and limitations placeholders
-
-### Contribution — TBD
-
-Do not finalize this section until pilot results identify a stable phenomenon. Candidate claims are listed in the [research agenda](research-agenda.md).
-
-### Limitations — TBD
-
-At minimum, the final paper should discuss external validity of stylized pricing games, model/version drift, stochasticity, scaffold dependence, construct validity of collusion metrics, and the distinction between explicit textual memory and latent model state.
+The sections are organized by claims and disagreements, not by a sequence of paper summaries. Each section ends with the implication for the present experiment. The paper-specific details and reading priorities are kept separately in the [structured reading list](reading-list.md).

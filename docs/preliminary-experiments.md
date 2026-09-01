@@ -1,145 +1,114 @@
-# Preliminary Experiments and Method Revision
+# Experiment and Current Results
 
-## Status and scope
+## Research question
 
-This document records the exploratory work found in `report_new`. It separates completed preliminary evidence from the paper-aligned experiment that has not yet produced usable rounds.
+When demand expands gradually without being disclosed, do two LLM pricing agents infer the change and adjust their prices, or do they keep an early price once it produces acceptable profit?
 
-The completed evidence is a baseline, not a final replication or contribution claim. It is useful for diagnosing the behavior of the current agent loop and motivating the next experimental design.
+## Experimental requirements
 
-## Current implementation
+The comparison is designed to isolate the demand path.
 
-### Market
+- Mature and expanding cells use the same model, market parameters, prompt structure, oversight mode, and stopping rule.
+- Industry descriptions change the narrative context only; they do not change the demand or cost parameters.
+- Agents are shown a qualitative mature/expanding market description, but not the demand equation, numerical growth path, current demand shift, equilibrium price, or counterfactual profits.
+- Agents observe both firms' past prices and only their own realized quantity and profit.
+- Analysis uses both raw prices and round-specific economic benchmarks.
+- Price and note analysis is descriptive; neither is treated as sufficient proof of collusion or internal reasoning.
 
-- Two firms choose prices simultaneously in each round.
-- Prices are constrained to `[1.00, 3.00]`; marginal cost is `1.00`.
-- Demand follows a differentiated-products regular-logit model with an outside option.
-- The current calibration uses quality `2.0` and temperature `0.25`.
-- These parameters reproduce the reported price benchmarks approximately: symmetric Nash `p_NE = 1.473` and standalone monopoly `p_M = 1.802`.
-- The source paper does not disclose the underlying utility parameters, so this is a benchmark-level calibration rather than an exact structural reproduction.
+## Market and information setup
 
-### Agent state and observations
+Two firms choose prices simultaneously in each round. Prices lie between 1.00 and 3.00, marginal cost is 1.00, and demand follows a regular-logit model with an outside option. Product quality is 2.0 and temperature is 0.25.
 
-Each agent observes the full sequence of both firms' past prices and its own realized quantity and profit. It receives no analytical demand curve or counterfactual profit table. Its private natural-language `notes` field persists across rounds and is replaced by the newly generated notes after each decision.
+In the mature condition, common product attractiveness remains fixed. In the expanding condition, it increases linearly from zero in round 1 to `0.1732867951` in round 40 and remains at that level. This value is calibrated so that, when both prices equal 2.00, the outside-option share falls from one third to one fifth.
 
-The main output schema is:
+The agents receive only qualitative scenario text. They are told that they operate either in consumer retail or B2B software and that the market is mature or expanding, but they are not shown how that description maps to the numerical demand process.
 
-```text
-price → public justification → competitor-information disclosure → private notes
-```
+Each agent's private `notes` field is passed into its next decision. The full numerical history is also shown each round.
 
-A price-last treatment changes the order to:
+Oversight is passive. The system records behavioral flags, but flags do not alter prices and are not shown to the agents. This avoids regulator feedback becoming a second treatment.
 
-```text
-public justification → competitor-information disclosure → private notes → price
-```
+## Model and API
 
-### Oversight modes
+The completed runs used:
 
-- **Passive:** flags are recorded, but prices are not changed.
-- **Revision:** a flagged proposal triggers a second model call requesting a lower revision.
-- **Veto:** a flagged proposal is replaced according to the regulator rule.
+- model: `gemini-3.5-flash-lite`;
+- provider: Google Gemini Developer API;
+- SDK: `google-genai`;
+- method: asynchronous `GenerateContent`;
+- response: schema-constrained JSON;
+- stored provider interaction: disabled;
+- response-field order: price, justification, competitor-information disclosure, private notes.
 
-The behavioral flags cover an elevated price relative to the competitive benchmark, sustained increases, and parallel elevated movement after a warm-up period.
+The API key was loaded from the environment and was not written into result files. The saved manifests record `generate_content`, and the public client exposes the API method explicitly.
 
-## API and model configuration
+## Completed design
 
-The completed preliminary runs used the **Google Gemini Developer API** through the `google-genai` Python SDK with model `gemini-3.5-flash-lite`. Calls were asynchronous and returned schema-constrained JSON. Normal experiment calls used `store=false`; API keys were loaded from ignored environment files and are not included in this repository.
+| Factor | Values |
+|---|---|
+| Market | mature, expanding |
+| Industry description | consumer retail, B2B software |
+| Seed | 0, 1, 2 |
+| Oversight | passive |
+| Requested maximum | 100 rounds |
+| Minimum before stopping | 60 rounds |
 
-The current code path for `gemini-2.5-*` and `gemini-3.7-*` models calls:
+This gives 12 completed cells. Convergence is checked every 5 rounds using a 20-round window. Both agents must have a price coefficient of variation no greater than 0.03 and a difference between the two half-window means no greater than 0.01. The 60-round minimum ensures that the expanding cells contain at least 20 rounds after demand reaches its plateau in round 40.
 
-```python
-client.aio.models.generate_content(...)
-```
+## Metrics
 
-with `response_mime_type="application/json"` and a Pydantic response schema. The intended paper-main update is `gemini-3.7-flash`, `thinking_level=high`, temperature unset, seed recorded, and online convergence checks enabled. Attempts at this updated profile had produced zero completed rounds at the time of this audit because of provider-side quota and availability errors. No result below is attributed to Gemini 3.7 Flash.
+- **Late-round price:** mean executed price across both agents in rounds 41–60.
+- **Dynamic price index:** the executed price minus the round-specific symmetric Nash price, divided by the gap between the round-specific symmetric joint-profit price and Nash price. Zero corresponds to Nash and one to the joint-profit benchmark.
+- **Unchanged decision:** the next posted price exactly equals the previous posted price.
+- **Small move:** the absolute price change is no larger than 0.05.
+- **Stay after non-declining profit:** the next price is unchanged when the agent's previous realized profit was at least its profit one round earlier.
+- **Notes screen:** a transparent keyword count for maintain/hold and explore/test language. This is not a semantic classifier.
 
-An OpenAI Responses API adapter exists in the broader working directory, but it was not the provider used for the completed result set summarized here.
+At the demand plateau, the calibrated benchmarks are:
 
-## Completed exploratory design
+| Market | Symmetric Nash | Symmetric joint-profit | Standalone monopoly |
+|---|---:|---:|---:|
+| Mature | 1.473 | 1.925 | 1.802 |
+| Expanding | 1.485 | 2.054 | 1.925 |
 
-The response-order comparison contains:
+## Current results
 
-- 3 random seeds (`0–2`);
-- 2 output-field orders (`paper`, `price-last`);
-- 3 oversight modes (`passive`, `revision`, `veto`);
-- 100 rounds per cell;
-- 18 completed cells and 1,800 market rounds in total.
+| Market | Late-round price | Dynamic price index | Unchanged | Move ≤ 0.05 | Stay after profit did not fall | Maintain/hold notes | Explore/test notes |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Mature | 2.038 | 1.249 | 96.2% | 100.0% | 99.1% | 73.2% | 1.5% |
+| Expanding | 2.088 | 1.058 | 90.5% | 98.9% | 95.8% | 88.6% | 3.6% |
 
-The archived run report records 3,662 successful model decisions and approximately 11.63 million tokens, including revision calls.
+The paired expanding-minus-mature late-round price difference averaged `+0.05` in the retail description and `+0.05` in the software description. The cell-level differences vary across seeds; with three seeds they should not be treated as a precise treatment-effect estimate.
 
-## Preliminary results
+The dynamic index is lower in the expanding cells even though their raw prices are higher. This is not contradictory. Hidden demand growth raises the economic benchmarks, and the agents' prices do not rise by the same amount.
 
-### Late-round prices
+Across both market conditions, agents changed prices very little. If profit had not fallen, they usually repeated the previous decision. Notes often described the current price as stable or satisfactory and rarely proposed meaningful exploration. This suggests a concrete limitation of the current method: the agents learn only from prices they choose themselves, and very small changes provide little information about a changing demand curve.
 
-The table reports the average executed price over the final 20 rounds.
+## What the results do and do not show
 
-| Seed | Order | Passive | Revision | Veto |
-|---:|---|---:|---:|---:|
-| 0 | paper | 1.975 | 1.500 | 1.490 |
-| 1 | paper | 1.975 | 1.595 | 1.615 |
-| 2 | paper | 2.000 | 1.475 | 1.325 |
-| 0 | price-last | 1.950 | 1.560 | 1.600 |
-| 1 | price-last | 1.420 | 1.450 | 1.400 |
-| 2 | price-last | 1.850 | 1.500 | 1.580 |
+The results show strong inertia and weak adjustment to hidden demand expansion for this model, prompt, and set of 12 runs. They also show why raw prices must be interpreted against changing benchmarks.
 
-Price-last reduced the passive late-round price in all three seeds, with paired differences of `-0.025`, `-0.555`, and `-0.150` and a mean difference of `-0.243`. The active-oversight effects were heterogeneous across seeds, so the current sample does not support a general claim that response order consistently strengthens revision or veto.
+They do not show that:
 
-All 18 cells passed the implemented stability criterion between rounds 40 and 55. Seventeen reached exact fixed points by round 35; one settled into a period-two pattern. Fast convergence therefore did not imply agreement across seeds: different runs entered different absorbing states.
+- all LLM pricing agents behave this way;
+- the notes caused the price inertia;
+- the observed prices are optimal;
+- the agents formed a genuine collusive reward–punishment strategy; or
+- the treatment effect is precisely estimated with three seeds.
 
-The self-reported `used_competitor_info` field was `false` in all nine paper-order cells and `true` in only 6 of 1,800 agent-round observations in the price-last cells. It is therefore not a useful standalone measure of whether competitor information affected the policy.
+## Current work
 
-### Behavioral inertia audit
+The active work is limited to what is already underway:
 
-We separately audited the six passive runs so regulator actions could not mechanically create the observed price path.
+1. verify the 12 trajectories and all derived metrics;
+2. align the public implementation with the saved hidden-demand design and API manifests; and
+3. decide, from that audit, how much exogenous exploration a later method will require.
 
-| Diagnostic | Paper order | Price-last |
-|---|---:|---:|
-| Adjacent decisions with exactly unchanged price | 589/594 (99.2%) | 528/594 (88.9%) |
-| Adjacent decisions with change no larger than 0.05 | 593/594 (99.8%) | 586/594 (98.7%) |
-| Unchanged price during the first 20 rounds | 109/114 (95.6%) | 66/114 (57.9%) |
-| Stay after previous profit did not decline | 582/583 (99.8%) | 517/541 (95.6%) |
-| Mean absolute next-price change after non-declining profit | 0.0001 | 0.0019 |
-| Notes containing a maintain/hold phrase | 473/600 (78.8%) | 414/600 (69.0%) |
-| Notes containing an explicit explore/test phrase | 4/600 (0.7%) | 26/600 (4.3%) |
+No later intervention experiment has yet been run, so none is reported as part of the current study.
 
-The price and profit diagnostics are direct calculations from the saved trajectories. The notes counts are a transparent keyword screen, not a semantic classifier and not causal evidence.
+## Earlier pilot
 
-## Problems revealed by the current method
-
-1. **Premature policy lock-in.** The agent often interprets non-decreasing profit as sufficient evidence that the current action is optimal. It then writes that conclusion into persistent notes and repeatedly reuses it.
-2. **Weak endogenous exploration.** Even when the agent says it is testing an alternative, the move is usually at most `0.05`. Such local steps reveal little about the wider response surface.
-3. **Self-confirming observations.** The agent sees profit only at the price it chose while the rival changes endogenously. A stable profit does not show that a substantially different unilateral price would be worse.
-4. **History and notes are bundled.** Full numerical history and persistent notes grow together, so the existing runs cannot identify whether lock-in comes from observations, compressed text memory, or both.
-5. **Convergence is not optimality or collusion.** An exact fixed point can represent a local heuristic, a prompt-induced convention, or a strategic outcome. Stability alone cannot distinguish these mechanisms.
-6. **Self-report is weak evidence.** Near-universal denial of competitor influence conflicts with notes that sometimes discuss rival prices. Public compliance fields should not be treated as ground truth.
-7. **Limited external validity and power.** The completed comparison uses one model family, three seeds, a stylized calibrated market, and a now-superseded model version.
-
-## Next experiment: change from free search to intervention-based identification
-
-The next study should not ask the LLM to discover the market solely through unconstrained repeated price choices. It should place controlled perturbations into an otherwise identical agent loop.
-
-### Proposed design
-
-1. **Matched baseline:** run a mature market from a fresh state.
-2. **Regime transition:** run growth → mature with the same final mature parameters.
-3. **Randomized memory intervention at transition:** carry, reset, or sanitize private notes while holding model, prompt, numerical history disclosure, seed, and final market constant.
-4. **Exogenous exploration probes:** at pre-registered rounds, impose a small set of price probes or a unilateral deviation on one firm. This supplies information outside the agent's self-selected local neighborhood.
-5. **Autonomous recovery window:** return control to both agents and measure whether they revert, retaliate, adapt, or discover a more profitable response.
-
-Primary outcomes should be behavioral: post-transition adjustment speed, final-price hysteresis, profit regret relative to a known best response, reaction to unilateral deviations, recovery time, and sensitivity to memory intervention. Notes should be analyzed only after these outcomes are fixed, and preferably through pre-registered labels or held-out prediction.
-
-This method directly tests adaptation and memory while reducing the chance that the result is merely an artifact of an LLM's reluctance to explore.
-
-## Interpretation limits
-
-- The inertia statistics describe these saved runs; they do not establish a universal property of LLM agents.
-- Keyword counts do not prove that notes caused behavior.
-- The response-order comparison is exploratory and based on only three seeds.
-- Completed Gemini 3.5 Flash-Lite runs used the earlier baseline implementation and should not be labeled as a paper-perfect replication.
-- The paper-aligned Gemini 3.7 Flash profile requires a fresh completed run before any direct comparison or confirmatory claim.
+An earlier 18-cell pilot compared response-field order and passive, revision, and veto oversight. It is retained in `results/preliminary-results.csv` as provenance for the initial code. The most relevant diagnostic was that paper-order passive runs repeated the previous price in 99.2% of adjacent decisions and made changes no larger than 0.05 in 99.8%. This pilot motivated the closer inertia analysis, but it is not the main experiment in this repository.
 
 ## Contribution and limitations — TBD
 
-**Contribution:** TBD after the intervention pilot establishes whether path dependence, explicit memory, or deviation response is the most stable mechanism.
-
-**Additional limitations:** TBD after the final model set, number of seeds, transition schedule, and probe design are fixed.
+The final contribution and complete limitations section will be written after the current audit and any revised experiment are complete. The present limitation is already clear: the main design contains one model version, two narrative contexts, three seeds, and a stylized two-firm market.
