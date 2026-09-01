@@ -11,7 +11,7 @@ We compare two market conditions:
 
 The agents receive a qualitative description of the market phase, but are never shown the demand equation, the numerical growth path, or the current demand level. They must infer the magnitude of change from their own realized quantity and profit, together with both firms' past prices.
 
-**Current status:** all 12 cells in the main experiment are complete. We are checking the trajectories, the analysis code, and the reproducibility package. The results below are descriptive because the current sample contains only three seeds.
+**Current status:** all 12 cells in the main experiment are complete. We are checking the trajectories, result calculations, and the reproducibility package. The results below are descriptive because the current sample contains only three seeds.
 
 ## Problem setup
 
@@ -81,6 +81,8 @@ We are currently:
 - validating all 12 saved trajectories and the dynamic benchmark calculations;
 - making the hidden-demand treatment reproducible from the public code;
 - checking whether the observed inertia is robust enough to justify a revised experimental method.
+
+Because the current free-choice loop produces almost no meaningful exploration, the next experiment will use a different method to create more informative price variation. Its exact design is not listed here because it has not yet been implemented.
 
 No unimplemented experiment is presented here as part of the study.
 
