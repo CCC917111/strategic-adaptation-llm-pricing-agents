@@ -1,4 +1,4 @@
-"""Durable JSONL experiment records and atomic run manifests."""
+"""Durable experiment records and atomic run manifests."""
 
 import json
 import os
@@ -27,8 +27,7 @@ def round_to_dict(result: ExperimentRound) -> dict[str, Any]:
         "round_index": result.round_index,
         "proposals": [asdict(item) for item in result.proposals],
         "revisions": [
-            asdict(item) if item is not None else None
-            for item in result.revisions
+            asdict(item) if item is not None else None for item in result.revisions
         ],
         "assessments": [
             {
@@ -52,7 +51,6 @@ def round_to_dict(result: ExperimentRound) -> dict[str, Any]:
 def round_from_dict(data: dict[str, Any]) -> ExperimentRound:
     if data.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("Unsupported experiment-round schema version.")
-
     proposals = tuple(PricingDecision(**item) for item in data["proposals"])
     revisions = tuple(
         PricingDecision(**item) if item is not None else None
@@ -78,10 +76,7 @@ def round_from_dict(data: dict[str, Any]) -> ExperimentRound:
         proposals=(proposals[0], proposals[1]),
         revisions=(revisions[0], revisions[1]),
         assessments=(assessments[0], assessments[1]),
-        executed_prices=(
-            data["executed_prices"][0],
-            data["executed_prices"][1],
-        ),
+        executed_prices=(data["executed_prices"][0], data["executed_prices"][1]),
         market_outcome=outcome,
     )
 
@@ -95,10 +90,7 @@ class ExperimentStore:
         self.manifest_path = self.output_directory / "manifest.json"
 
     def initialize(
-        self,
-        config: dict[str, Any],
-        *,
-        resume: bool,
+        self, config: dict[str, Any], *, resume: bool
     ) -> list[ExperimentRound]:
         self.output_directory.mkdir(parents=True, exist_ok=True)
         existing = self.load_rounds()
@@ -107,17 +99,16 @@ class ExperimentStore:
                 f"{self.rounds_path} already has {len(existing)} rounds; "
                 "use --resume or choose another output directory."
             )
-
         if self.manifest_path.exists():
             manifest = json.loads(self.manifest_path.read_text())
-            prior_config = manifest.get("config")
-            if prior_config != config:
-                raise ValueError(
-                    "Existing manifest configuration differs from this run."
-                )
-            manifest["status"] = "running"
-            manifest["resumed_at"] = utc_now()
-            manifest["completed_rounds"] = len(existing)
+            if manifest.get("config") != config:
+                raise ValueError("Existing manifest configuration differs from this run.")
+            manifest.update(
+                status="running",
+                resumed_at=utc_now(),
+                completed_rounds=len(existing),
+            )
+            self._clear_terminal_fields(manifest)
         else:
             manifest = {
                 "schema_version": SCHEMA_VERSION,
@@ -131,15 +122,12 @@ class ExperimentStore:
 
     def append_round(self, result: ExperimentRound) -> None:
         serialized = json.dumps(
-            round_to_dict(result),
-            ensure_ascii=False,
-            separators=(",", ":"),
+            round_to_dict(result), ensure_ascii=False, separators=(",", ":")
         )
         with self.rounds_path.open("a", encoding="utf-8") as handle:
             handle.write(serialized + "\n")
             handle.flush()
             os.fsync(handle.fileno())
-
         manifest = json.loads(self.manifest_path.read_text())
         manifest["completed_rounds"] = result.round_index
         manifest["last_checkpoint_at"] = utc_now()
@@ -147,6 +135,10 @@ class ExperimentStore:
 
     def finish(self, *, stopping: dict[str, Any] | None = None) -> None:
         manifest = json.loads(self.manifest_path.read_text())
+        # A resumed run may previously have failed. Completed manifests must not
+        # retain that stale failure, which made several archived runs ambiguous.
+        for field in ("error", "error_type", "failed_at"):
+            manifest.pop(field, None)
         manifest["status"] = "completed"
         manifest["finished_at"] = utc_now()
         if stopping is not None:
@@ -155,10 +147,12 @@ class ExperimentStore:
 
     def fail(self, exc: Exception) -> None:
         manifest = json.loads(self.manifest_path.read_text())
-        manifest["status"] = "failed"
-        manifest["failed_at"] = utc_now()
-        manifest["error_type"] = type(exc).__name__
-        manifest["error"] = str(exc)
+        manifest.update(
+            status="failed",
+            failed_at=utc_now(),
+            error_type=type(exc).__name__,
+            error=str(exc),
+        )
         self._write_manifest(manifest)
 
     def load_rounds(self) -> list[ExperimentRound]:
@@ -175,10 +169,21 @@ class ExperimentStore:
                     raise ValueError(
                         f"Invalid checkpoint at line {line_number}."
                     ) from exc
-        for expected_index, item in enumerate(rounds, start=1):
-            if item.round_index != expected_index:
+        for expected, item in enumerate(rounds, start=1):
+            if item.round_index != expected:
                 raise ValueError("Checkpoint rounds are not contiguous.")
         return rounds
+
+    @staticmethod
+    def _clear_terminal_fields(manifest: dict[str, Any]) -> None:
+        for field in (
+            "error",
+            "error_type",
+            "failed_at",
+            "finished_at",
+            "stopping",
+        ):
+            manifest.pop(field, None)
 
     def _write_manifest(self, manifest: dict[str, Any]) -> None:
         temporary = self.manifest_path.with_suffix(".json.tmp")

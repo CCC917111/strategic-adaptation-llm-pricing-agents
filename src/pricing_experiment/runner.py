@@ -75,8 +75,12 @@ class GameRunner:
         benchmark_prices = None
         if self.use_round_best_response_benchmark:
             benchmark_prices = (
-                self.market.best_response(proposed_prices[1]),
-                self.market.best_response(proposed_prices[0]),
+                self.market.best_response(
+                    proposed_prices[1], round_index=round_index
+                ),
+                self.market.best_response(
+                    proposed_prices[0], round_index=round_index
+                ),
             )
 
         assessments = self.regulator.assess_round(
