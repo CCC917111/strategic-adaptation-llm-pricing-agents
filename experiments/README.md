@@ -1,38 +1,47 @@
-# Experiment Reproducibility Notes
+# Reproducing the Current Experiment
 
-## What is included
+## Included experiment
 
-The repository contains the sanitized core implementation needed to inspect the market, prompt/state loop, Gemini structured-output call, oversight logic, persistence, and convergence criteria. Secret-bearing `.env` files, key-pool backups, virtual environments, raw provider logs, and large raw trajectories are intentionally excluded.
-
-The compact result table in `results/preliminary-results.csv` was transcribed from 18 completed archived runs. It is provided for review, not as a substitute for publishing the raw trajectories after they have been checked for sensitive metadata.
-
-## Environment variables
-
-Copy `.env.example` to a local `.env` and supply your own key. Never commit `.env`.
+The current main experiment is the 12-cell hidden-demand comparison:
 
 ```text
-GEMINI_API_KEY=your_key_here
-GEMINI_MODEL=gemini-3.7-flash
+2 markets (mature, expanding)
+× 2 industry descriptions (retail, software)
+× 3 seeds (0, 1, 2)
 ```
 
-The completed exploratory runs used `gemini-3.5-flash-lite`; the intended next run uses `gemini-3.7-flash` with high thinking and no explicit temperature.
+Every completed cell used `gemini-3.5-flash-lite`, passive oversight, paper response order, and the Gemini `GenerateContent` method. The fixed design values are in `hidden-demand-design.json`.
 
-## Paper-main profile
+## Environment
+
+Install the project and Gemini dependency, then set your own key in the process environment. Never commit an `.env` file.
+
+```bash
+python -m pip install -e '.[gemini]'
+export GEMINI_API_KEY='your-key'
+```
+
+## Example run
 
 ```bash
 python -m pricing_experiment.run_live \
-  --paper-main \
-  --provider gemini \
-  --model gemini-3.7-flash \
-  --thinking-level high \
-  --mode passive \
-  --rounds 100 \
+  --market expanding \
+  --industry retail \
   --seed 0 \
-  --output experiments/results/paper_main_passive_seed0
+  --output experiments/results/hidden_demand_retail_expanding_seed0
 ```
 
-Repeat with `--mode revision` and `--mode veto`. Provider quotas, retry policy, model availability, exact SDK version, timestamps, and the run manifest should be archived with every result.
+Repeat for both markets, both industries, and seeds 0–2. The defaults match the completed experiment: maximum 100 rounds, minimum 60 rounds, convergence checks every 5 rounds with a 20-round window, and a 2-second delay between rounds.
 
-## Next-method profile
+The saved manifest records the requested model, API method, market treatment, scenario text, convergence configuration, and retry settings. API keys are never recorded.
 
-The next experiment will add controlled regime transitions, randomized carry/reset/sanitize memory conditions, and pre-registered exogenous price probes. Those changes are not yet implemented in the uploaded baseline and are deliberately marked TBD rather than silently mixed into the preliminary results.
+## Data included here
+
+- `results/hidden-demand-summary.csv`: the 12 cell-level summaries used in the README.
+- `results/preliminary-results.csv`: an older response-order and oversight pilot, retained as a legacy record.
+
+Raw provider logs and text trajectories are not included yet. They require a separate metadata and privacy check before publication.
+
+## Known reproducibility limit
+
+The completed trajectories were created before this public package contained the hidden-demand market implementation. The implementation has now been added and its calibration is tested, but a fresh end-to-end API rerun has not yet been completed with the public package. The current work is therefore a code-and-result audit, not a claim of independent reproduction.
