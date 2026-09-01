@@ -1,12 +1,6 @@
-"""Deterministic market primitives for the pricing-agent experiment."""
+"""Market primitives for the pricing-agent experiment."""
 
 from .config import MarketConfig
 from .market import FirmOutcome, LogitMarket, MarketOutcome
 
-__all__ = [
-    "FirmOutcome",
-    "LogitMarket",
-    "MarketConfig",
-    "MarketOutcome",
-]
-
+__all__ = ["FirmOutcome", "LogitMarket", "MarketConfig", "MarketOutcome"]
