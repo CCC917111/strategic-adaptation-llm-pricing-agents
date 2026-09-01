@@ -1,9 +1,8 @@
-"""Minimal Gemini adapter used by the pricing-agent experiment.
+"""Gemini adapter used by the pricing-agent experiment.
 
-The completed Gemini 3.5 Flash-Lite runs used the Interactions API. The
-paper-main Gemini 3.7 Flash profile uses GenerateContent because that is the
-stable structured-output path for the current model family. API keys are read
-only from the process environment and are never written to experiment files.
+The completed hidden-demand runs used ``GenerateContent`` with Gemini 3.5
+Flash-Lite. The API method is explicit so a model-name heuristic cannot silently
+change the experiment. API keys are read only from the process environment.
 """
 
 from __future__ import annotations
@@ -27,6 +26,7 @@ class GeminiModelClient:
         temperature: float | None = None,
         response_order: ResponseOrder = ResponseOrder.PAPER,
         prompt_treatment: PromptTreatment = PromptTreatment.PAPER,
+        api_method: str = "generate_content",
         store: bool = False,
     ) -> None:
         try:
@@ -74,10 +74,17 @@ class GeminiModelClient:
 
         self._client = genai.Client(api_key=api_key)
         self._schema = DecisionSchema
-        self.model = model or os.environ.get("GEMINI_MODEL", "gemini-3.7-flash")
+        self.model = model or os.environ.get(
+            "GEMINI_MODEL", "gemini-3.5-flash-lite"
+        )
         self.seed = seed
         self.thinking_level = thinking_level
         self.temperature = temperature
+        if api_method not in {"generate_content", "interactions", "auto"}:
+            raise ValueError(
+                "api_method must be generate_content, interactions, or auto."
+            )
+        self.api_method = api_method
         self.store = store
 
     async def generate(
@@ -86,7 +93,14 @@ class GeminiModelClient:
         system_prompt: str,
         user_prompt: str,
     ) -> PricingDecision:
-        if self.model.startswith(("gemini-2.5", "gemini-3.7")):
+        method = self.api_method
+        if method == "auto":
+            method = (
+                "generate_content"
+                if self.model.startswith(("gemini-2.5", "gemini-3.5", "gemini-3.7"))
+                else "interactions"
+            )
+        if method == "generate_content":
             return await self._generate_content(system_prompt, user_prompt)
         return await self._generate_interaction(system_prompt, user_prompt)
 
