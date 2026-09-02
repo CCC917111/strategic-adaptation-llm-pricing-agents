@@ -1,67 +1,186 @@
-# Experiment and Current Results
+# Experiments and Results: From Paper Baseline to Dynamic Demand
 
-## Research question
+## Overview
 
-When demand expands gradually without being disclosed, do two LLM pricing agents infer the change and adjust their prices, or do they keep an early price once it produces acceptable profit?
+The experiments were not designed all at once. They form a sequence:
 
-## Experimental requirements
+1. implement the static repeated-pricing setting from *Oversight Is Not Compliance*;
+2. test one small change to the LLM response schema; and
+3. add gradual demand expansion to test adaptation.
 
-The comparison is designed to isolate the demand path.
+This document reports only completed experiments. A later method change is noted at the end but is not presented as an experiment.
 
-- Mature and expanding cells use the same model, market parameters, prompt structure, oversight mode, and stopping rule.
-- Industry descriptions change the narrative context only; they do not change the demand or cost parameters.
-- Agents are shown a qualitative mature/expanding market description, but not the demand equation, numerical growth path, current demand shift, equilibrium price, or counterfactual profits.
-- Agents observe both firms' past prices and only their own realized quantity and profit.
-- Analysis uses both raw prices and round-specific economic benchmarks.
-- Price and note analysis is descriptive; neither is treated as sufficient proof of collusion or internal reasoning.
+## Part I. Paper-based baseline reproduction
 
-## Market and information setup
+### Reference setting
 
-Two firms choose prices simultaneously in each round. Prices lie between 1.00 and 3.00, marginal cost is 1.00, and demand follows a regular-logit model with an outside option. Product quality is 2.0 and temperature is 0.25.
+The paper places two LLM agents in a repeated differentiated-products market. Both choose prices simultaneously. A deterministic regulator observes proposals and applies one of three oversight modes.
 
-In the mature condition, common product attractiveness remains fixed. In the expanding condition, it increases linearly from zero in round 1 to `0.1732867951` in round 40 and remains at that level. This value is calibrated so that, when both prices equal 2.00, the outside-option share falls from one third to one fifth.
+Each agent receives:
 
-The agents receive only qualitative scenario text. They are told that they operate either in consumer retail or B2B software and that the market is mature or expanding, but they are not shown how that description maps to the numerical demand process.
+- its firm ID and the current round;
+- the allowed price range;
+- both firms' previous prices;
+- its own realized quantity and profit;
+- its own private notes from the previous round; and
+- intervention feedback in revision or veto conditions when feedback is applicable.
 
-Each agent's private `notes` field is passed into its next decision. The full numerical history is also shown each round.
+Each agent returns, in this order:
 
-Oversight is passive. The system records behavioral flags, but flags do not alter prices and are not shown to the agents. This avoids regulator feedback becoming a second treatment.
+```text
+price → public justification → used_competitor_info → private notes
+```
 
-## Model and API
+The private notes are passed into the agent's next call. Public justification and the competitor-information disclosure are recorded separately from executed behavior.
 
-The completed runs used:
+### Market and oversight
 
-- model: `gemini-3.5-flash-lite`;
-- provider: Google Gemini Developer API;
-- SDK: `google-genai`;
-- method: asynchronous `GenerateContent`;
-- response: schema-constrained JSON;
-- stored provider interaction: disabled;
-- response-field order: price, justification, competitor-information disclosure, private notes.
-
-The API key was loaded from the environment and was not written into result files. The saved manifests record `generate_content`, and the public client exposes the API method explicitly.
-
-## Completed design
-
-| Factor | Values |
+| Item | Setting |
 |---|---|
-| Market | mature, expanding |
-| Industry description | consumer retail, B2B software |
-| Seed | 0, 1, 2 |
-| Oversight | passive |
-| Requested maximum | 100 rounds |
-| Minimum before stopping | 60 rounds |
+| Firms | 2 |
+| Price range | 1.00–3.00 |
+| Marginal cost | 1.00 |
+| Demand | Regular logit with an outside option |
+| Reported benchmarks | Nash 1.473; monopoly 1.802 |
+| Calibrated implementation | Quality 2.0; temperature 0.25 |
+| Warm-up | Rounds 1–10 |
+| Passive | Flags are logged; proposed prices execute unchanged; flags are not shown to agents |
+| Revision | A flagged proposal receives one model revision request and must fall by at least 0.01 |
+| Veto | The regulator replaces a flagged proposal using the benchmark cap and previous executed price |
 
-This gives 12 completed cells. Convergence is checked every 5 rounds using a 20-round window. Both agents must have a price coefficient of variation no greater than 0.03 and a difference between the two half-window means no greater than 0.01. The 60-round minimum ensures that the expanding cells contain at least 20 rounds after demand reaches its plateau in round 40.
+The regulator checks an elevated benchmark gap, sustained price increases, and parallel elevated movement.
 
-## Metrics
+### Completed baseline implementation
+
+The completed baseline used:
+
+- `gemini-3.5-flash-lite`;
+- Google Gemini Developer API;
+- the archived Interactions code path;
+- schema-constrained JSON;
+- `store=false`;
+- seeds 0, 1, and 2;
+- passive, revision, and veto oversight; and
+- 100 rounds per cell.
+
+This gives 9 completed cells and 900 market rounds.
+
+The runs match the paper's broad setting but have two known implementation differences. They used the fixed symmetric Nash price `1.473` for regulatory calculations instead of a round-specific best response, and they continued to round 100 instead of stopping online when the stability criterion was first met. The paper also does not disclose the full demand parameters, so those were calibrated. Results are therefore described as a paper-based baseline reproduction rather than an exact replication.
+
+### Baseline results
+
+The table reports mean executed price in rounds 81–100.
+
+| Seed | Passive | Revision | Veto |
+|---:|---:|---:|---:|
+| 0 | 1.975 | 1.500 | 1.490 |
+| 1 | 1.975 | 1.595 | 1.615 |
+| 2 | 2.000 | 1.475 | 1.325 |
+| **Mean** | **1.983** | **1.523** | **1.477** |
+
+The corresponding cross-seed mean supracompetitive indices are:
+
+| Passive | Revision | Veto |
+|---:|---:|---:|
+| 1.551 | 0.153 | 0.011 |
+
+Passive oversight produced a very similar late price in all three seeds. Revision and veto lowered the mean price but led to more varied terminal states.
+
+The passive runs also exposed strong inertia:
+
+| Diagnostic | Paper-order passive baseline |
+|---|---:|
+| Adjacent decisions with exactly unchanged price | 99.2% |
+| Adjacent decisions with change no larger than 0.05 | 99.8% |
+| Stay after previous profit did not decline | 99.8% |
+| Notes containing maintain/hold language | 78.8% |
+| Notes containing explicit explore/test language | 0.7% |
+
+The agents often interpreted non-decreasing profit as evidence that the current price should be retained. Stability therefore did not establish optimality or strategic collusion; it first revealed that the free-choice loop generated little exploration.
+
+## Part II. Response-order extension
+
+### What changed
+
+The next experiment retained the same market, model, oversight rules, seeds, and horizon. It changed only the structured response order:
+
+```text
+public justification → used_competitor_info → private notes → price
+```
+
+Price still came from the same single model call. This added 9 price-last cells matched to the 9 baseline cells.
+
+### Results
+
+| Seed | Mode | Paper order | Price last | Difference |
+|---:|---|---:|---:|---:|
+| 0 | Passive | 1.975 | 1.950 | -0.025 |
+| 1 | Passive | 1.975 | 1.420 | -0.555 |
+| 2 | Passive | 2.000 | 1.850 | -0.150 |
+| 0 | Revision | 1.500 | 1.560 | +0.060 |
+| 1 | Revision | 1.595 | 1.450 | -0.145 |
+| 2 | Revision | 1.475 | 1.500 | +0.025 |
+| 0 | Veto | 1.490 | 1.600 | +0.110 |
+| 1 | Veto | 1.615 | 1.400 | -0.215 |
+| 2 | Veto | 1.325 | 1.580 | +0.255 |
+
+Price-last lowered passive prices in all three paired seeds, with a mean difference of `-0.243`. The revision and veto differences changed direction across seeds.
+
+All 18 cells satisfied the low-variation stability criterion by round 55. Seventeen eventually reached exact price fixed points and one entered a period-two pattern. The response order therefore changed which stable path was selected, but did not solve the weak-exploration problem.
+
+The structured `used_competitor_info` field was `false` in every paper-order agent decision and `true` in only 6 of 1,800 price-last agent-round observations. It should not be treated as a reliable measure of whether rival prices influenced decisions.
+
+## Part III. Mature and expanding market extension
+
+### Why this extension follows from the baseline
+
+The baseline and response-order experiments showed rapid convergence, path sensitivity, and minimal price exploration in a stationary market. This raised a direct follow-up question: if the market changes gradually, will an agent revise its stabilized pricing rule?
+
+### What was retained
+
+The dynamic experiment retains:
+
+- two simultaneously acting pricing agents;
+- the same price range, marginal cost, base demand calibration, and outside option;
+- paper response order;
+- private persistent notes;
+- both firms' price histories and own quantity/profit feedback; and
+- passive oversight with no visible flag feedback.
+
+### What was added
+
+| Factor | Values | Role |
+|---|---|---|
+| Market | Mature, expanding | Changes the numerical demand path |
+| Industry description | Consumer retail, B2B software | Changes qualitative context only |
+| Seed | 0, 1, 2 | Measures run-to-run variation |
+
+In the mature condition, common product attractiveness remains fixed. In the expanding condition, it increases linearly from zero in round 1 to `0.1732867951` in round 40 and then remains constant. At symmetric price 2.00, this calibration changes the outside-option share from one third to one fifth.
+
+Agents are told qualitatively that the market is mature or expanding, but they are not shown the numerical demand equation, growth path, current shift, equilibrium prices, or counterfactual profits. They must infer the magnitude of change from realized quantity and profit.
+
+### API and stopping rule
+
+The 12 completed cells used:
+
+- `gemini-3.5-flash-lite`;
+- Google Gemini Developer API;
+- asynchronous `GenerateContent`;
+- schema-constrained JSON;
+- `store=false`;
+- passive oversight; and
+- paper response order.
+
+Convergence is checked every 5 rounds using a 20-round window. A cell cannot stop before round 60, which guarantees 20 observations after demand reaches its plateau in round 40. All 12 cells stopped at round 60.
+
+### Metrics
 
 - **Late-round price:** mean executed price across both agents in rounds 41–60.
-- **Dynamic price index:** the executed price minus the round-specific symmetric Nash price, divided by the gap between the round-specific symmetric joint-profit price and Nash price. Zero corresponds to Nash and one to the joint-profit benchmark.
-- **Unchanged decision:** the next posted price exactly equals the previous posted price.
-- **Small move:** the absolute price change is no larger than 0.05.
-- **Stay after non-declining profit:** the next price is unchanged when the agent's previous realized profit was at least its profit one round earlier.
-- **Notes screen:** a transparent keyword count for maintain/hold and explore/test language. This is not a semantic classifier.
+- **Dynamic price index:** zero at the round-specific symmetric Nash price and one at the round-specific symmetric joint-profit price.
+- **Unchanged decision:** the next price exactly equals the previous price.
+- **Small move:** absolute price change is no larger than 0.05.
+- **Stay after non-declining profit:** next price is unchanged when previous realized profit did not fall.
+- **Notes screen:** descriptive keyword counts, not a semantic or causal classifier.
 
 At the demand plateau, the calibrated benchmarks are:
 
@@ -70,45 +189,32 @@ At the demand plateau, the calibrated benchmarks are:
 | Mature | 1.473 | 1.925 | 1.802 |
 | Expanding | 1.485 | 2.054 | 1.925 |
 
-## Current results
+### Results
 
 | Market | Late-round price | Dynamic price index | Unchanged | Move ≤ 0.05 | Stay after profit did not fall | Maintain/hold notes | Explore/test notes |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Mature | 2.038 | 1.249 | 96.2% | 100.0% | 99.1% | 73.2% | 1.5% |
 | Expanding | 2.088 | 1.058 | 90.5% | 98.9% | 95.8% | 88.6% | 3.6% |
 
-The paired expanding-minus-mature late-round price difference averaged `+0.05` in the retail description and `+0.05` in the software description. The cell-level differences vary across seeds; with three seeds they should not be treated as a precise treatment-effect estimate.
+The paired expanding-minus-mature late-round difference averaged `+0.05` in both industry descriptions. The dynamic index was lower under expansion because the economic benchmarks increased more than the agents' prices.
 
-The dynamic index is lower in the expanding cells even though their raw prices are higher. This is not contradictory. Hidden demand growth raises the economic benchmarks, and the agents' prices do not rise by the same amount.
+Most importantly, the inertia found in the paper-based baseline remained. Expanding-market agents changed slightly more often, but more than 90% of adjacent decisions were still unchanged and almost every adjustment was no larger than 0.05.
 
-Across both market conditions, agents changed prices very little. If profit had not fallen, they usually repeated the previous decision. Notes often described the current price as stable or satisfactory and rarely proposed meaningful exploration. This suggests a concrete limitation of the current method: the agents learn only from prices they choose themselves, and very small changes provide little information about a changing demand curve.
+## Part IV. What has been learned so far
 
-## What the results do and do not show
+The experimental progression supports four limited conclusions:
 
-The results show strong inertia and weak adjustment to hidden demand expansion for this model, prompt, and set of 12 runs. They also show why raw prices must be interpreted against changing benchmarks.
+1. the paper-based static-market implementation reproduces stable high passive prices and lower average prices under active oversight;
+2. moving the price field changes the terminal path, especially under passive oversight;
+3. neither stationary experiment produced substantial endogenous exploration; and
+4. adding gradual demand growth changed raw prices only slightly and did not remove the tendency to keep a locally satisfactory price.
 
-They do not show that:
+These results do not show that high prices are necessarily collusive, that private notes caused inertia, or that three seeds estimate a general treatment effect precisely.
 
-- all LLM pricing agents behave this way;
-- the notes caused the price inertia;
-- the observed prices are optimal;
-- the agents formed a genuine collusive reward–punishment strategy; or
-- the treatment effect is precisely estimated with three seeds.
+## Current work and method change
 
-## Current work
-
-The active work is limited to what is already underway:
-
-1. verify the 12 trajectories and all derived metrics;
-2. align the public implementation with the saved hidden-demand design and API manifests; and
-3. decide, from that audit, how much exogenous exploration a later method will require.
-
-No later intervention experiment has yet been run, so none is reported as part of the current study.
-
-## Earlier pilot
-
-An earlier 18-cell pilot compared response-field order and passive, revision, and veto oversight. It is retained in `results/preliminary-results.csv` as provenance for the initial code. The most relevant diagnostic was that paper-order passive runs repeated the previous price in 99.2% of adjacent decisions and made changes no larger than 0.05 in 99.8%. This pilot motivated the closer inertia analysis, but it is not the main experiment in this repository.
+We are validating the saved trajectories, benchmark calculations, and public reproduction code. Because the free-choice loop repeatedly produces tiny or zero price changes, the next experiment will use a different method to create more informative variation. That experiment has not yet been implemented and is not described as a completed result here.
 
 ## Contribution and limitations — TBD
 
-The final contribution and complete limitations section will be written after the current audit and any revised experiment are complete. The present limitation is already clear: the main design contains one model version, two narrative contexts, three seeds, and a stylized two-firm market.
+The final contribution and complete limitations section remain TBD. The confirmed limitations are one model family, three seeds per comparison, a stylized two-firm market, calibrated demand parameters, and known deviations between the completed baseline and the fully paper-aligned protocol.
