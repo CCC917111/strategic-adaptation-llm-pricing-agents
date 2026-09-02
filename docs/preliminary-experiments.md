@@ -1,75 +1,38 @@
-# Experiments and Results: From Paper Baseline to Dynamic Demand
+# Experiments and Results
 
-## Overview
+This document reports only completed experiments. All comparisons use the same basic repeated-pricing testbed before changing the oversight rule, response schema, or demand path.
 
-The experiments were not designed all at once. They form a sequence:
+## Shared market and agent setting
 
-1. implement the static repeated-pricing setting from *Oversight Is Not Compliance*;
-2. test one small change to the LLM response schema; and
-3. add gradual demand expansion to test adaptation.
+Two LLM agents simultaneously set prices for differentiated products. Demand is logit with an outside option, marginal cost is 1.00, and prices are restricted to 1.00–3.00. Product quality 2.0 and temperature 0.25 reproduce the reported symmetric Nash benchmark of 1.473. Under constant demand, the symmetric joint-profit price is 1.925 and the standalone monopoly price is 1.802.
 
-This document reports only completed experiments. A later method change is noted at the end but is not presented as an experiment.
+Each agent observes its firm ID, round, price range, both firms' past prices, its own quantity and profit, and its own private notes from the previous round. It returns a proposed price, public justification, competitor-information disclosure, and updated private notes. Notes persist to the next call; public text and self-disclosure are recorded separately from the action.
 
-## Part I. Paper-based baseline reproduction
+The experiments use `gemini-3.5-flash-lite` through the Google Gemini Developer API with schema-constrained JSON and `store=false`.
 
-### Reference setting
+## Static-market benchmark under oversight
 
-The paper places two LLM agents in a repeated differentiated-products market. Both choose prices simultaneously. A deterministic regulator observes proposals and applies one of three oversight modes.
+Demand is held constant while a deterministic regulator operates in one of three modes:
 
-Each agent receives:
+| Mode | Operation |
+|---|---|
+| Passive | Flags are logged; proposed prices execute unchanged; feedback is not shown to agents |
+| Revision | A flagged proposal receives one model revision request and must fall by at least 0.01 |
+| Veto | A flagged proposal is replaced using the benchmark cap and previous executed price |
 
-- its firm ID and the current round;
-- the allowed price range;
-- both firms' previous prices;
-- its own realized quantity and profit;
-- its own private notes from the previous round; and
-- intervention feedback in revision or veto conditions when feedback is applicable.
-
-Each agent returns, in this order:
+The regulator checks an elevated benchmark gap, sustained price increases, and parallel elevated movement after a ten-round warm-up. The response order is:
 
 ```text
 price → public justification → used_competitor_info → private notes
 ```
 
-The private notes are passed into the agent's next call. Public justification and the competitor-information disclosure are recorded separately from executed behavior.
+The completed design is 3 oversight modes × 3 seeds × 100 rounds, or 900 market rounds. It used the archived Gemini Interactions code path.
 
-### Market and oversight
+The broad market, prompt, memory, and oversight structure follows the setting used in *Oversight Is Not Compliance*. The implementation is not an exact replication: regulatory calculations used the fixed symmetric Nash price 1.473 rather than a round-specific best response, all runs continued to round 100 rather than stopping online, and the unreported demand parameters were calibrated.
 
-| Item | Setting |
-|---|---|
-| Firms | 2 |
-| Price range | 1.00–3.00 |
-| Marginal cost | 1.00 |
-| Demand | Regular logit with an outside option |
-| Reported benchmarks | Nash 1.473; monopoly 1.802 |
-| Calibrated implementation | Quality 2.0; temperature 0.25 |
-| Warm-up | Rounds 1–10 |
-| Passive | Flags are logged; proposed prices execute unchanged; flags are not shown to agents |
-| Revision | A flagged proposal receives one model revision request and must fall by at least 0.01 |
-| Veto | The regulator replaces a flagged proposal using the benchmark cap and previous executed price |
+### Results
 
-The regulator checks an elevated benchmark gap, sustained price increases, and parallel elevated movement.
-
-### Completed baseline implementation
-
-The completed baseline used:
-
-- `gemini-3.5-flash-lite`;
-- Google Gemini Developer API;
-- the archived Interactions code path;
-- schema-constrained JSON;
-- `store=false`;
-- seeds 0, 1, and 2;
-- passive, revision, and veto oversight; and
-- 100 rounds per cell.
-
-This gives 9 completed cells and 900 market rounds.
-
-The runs match the paper's broad setting but have two known implementation differences. They used the fixed symmetric Nash price `1.473` for regulatory calculations instead of a round-specific best response, and they continued to round 100 instead of stopping online when the stability criterion was first met. The paper also does not disclose the full demand parameters, so those were calibrated. Results are therefore described as a paper-based baseline reproduction rather than an exact replication.
-
-### Baseline results
-
-The table reports mean executed price in rounds 81–100.
+Mean executed price in rounds 81–100:
 
 | Seed | Passive | Revision | Veto |
 |---:|---:|---:|---:|
@@ -78,76 +41,41 @@ The table reports mean executed price in rounds 81–100.
 | 2 | 2.000 | 1.475 | 1.325 |
 | **Mean** | **1.983** | **1.523** | **1.477** |
 
-The corresponding cross-seed mean supracompetitive indices are:
+The corresponding cross-seed mean supracompetitive indices are 1.551, 0.153, and 0.011. Passive oversight produced similar late prices in all seeds; revision and veto lowered the mean but produced more varied terminal states.
 
-| Passive | Revision | Veto |
-|---:|---:|---:|
-| 1.551 | 0.153 | 0.011 |
+The passive condition also shows very limited exploration:
 
-Passive oversight produced a very similar late price in all three seeds. Revision and veto lowered the mean price but led to more varied terminal states.
-
-The passive runs also exposed strong inertia:
-
-| Diagnostic | Paper-order passive baseline |
+| Diagnostic | Result |
 |---|---:|
-| Adjacent decisions with exactly unchanged price | 99.2% |
+| Adjacent decisions with unchanged price | 99.2% |
 | Adjacent decisions with change no larger than 0.05 | 99.8% |
 | Stay after previous profit did not decline | 99.8% |
 | Notes containing maintain/hold language | 78.8% |
 | Notes containing explicit explore/test language | 0.7% |
 
-The agents often interpreted non-decreasing profit as evidence that the current price should be retained. Stability therefore did not establish optimality or strategic collusion; it first revealed that the free-choice loop generated little exploration.
+Stable prices therefore cannot be read directly as evidence of an optimized or collusive policy. The agents frequently treated non-declining profit as sufficient reason to keep the current action.
 
-## Part II. Response-order extension
+## Response-schema diagnostic
 
-### What changed
-
-The next experiment retained the same market, model, oversight rules, seeds, and horizon. It changed only the structured response order:
+To check whether field order affected the result, we matched the 9 static-market cells and changed only the structured response order:
 
 ```text
 public justification → used_competitor_info → private notes → price
 ```
 
-Price still came from the same single model call. This added 9 price-last cells matched to the 9 baseline cells.
+| Mode | Original-order mean | Price-last mean | Paired difference |
+|---|---:|---:|---:|
+| Passive | 1.983 | 1.740 | −0.243 |
+| Revision | 1.523 | 1.503 | −0.020 |
+| Veto | 1.477 | 1.527 | +0.050 |
 
-### Results
+The passive paired differences were −0.025, −0.555, and −0.150 across seeds. Revision and veto changed direction across seeds. Seventeen of the 18 combined runs reached exact price fixed points; one entered a period-two pattern.
 
-| Seed | Mode | Paper order | Price last | Difference |
-|---:|---|---:|---:|---:|
-| 0 | Passive | 1.975 | 1.950 | -0.025 |
-| 1 | Passive | 1.975 | 1.420 | -0.555 |
-| 2 | Passive | 2.000 | 1.850 | -0.150 |
-| 0 | Revision | 1.500 | 1.560 | +0.060 |
-| 1 | Revision | 1.595 | 1.450 | -0.145 |
-| 2 | Revision | 1.475 | 1.500 | +0.025 |
-| 0 | Veto | 1.490 | 1.600 | +0.110 |
-| 1 | Veto | 1.615 | 1.400 | -0.215 |
-| 2 | Veto | 1.325 | 1.580 | +0.255 |
+The diagnostic shows that a small scaffold change can select a different stable path. It does not remove the weak-exploration problem. The structured `used_competitor_info` field was also `false` in every original-order decision and `true` in only 6 of 1,800 price-last agent-round observations, so it is not treated as a reliable measure of behavioral influence.
 
-Price-last lowered passive prices in all three paired seeds, with a mean difference of `-0.243`. The revision and veto differences changed direction across seeds.
+## Mature and expanding demand
 
-All 18 cells satisfied the low-variation stability criterion by round 55. Seventeen eventually reached exact price fixed points and one entered a period-two pattern. The response order therefore changed which stable path was selected, but did not solve the weak-exploration problem.
-
-The structured `used_competitor_info` field was `false` in every paper-order agent decision and `true` in only 6 of 1,800 price-last agent-round observations. It should not be treated as a reliable measure of whether rival prices influenced decisions.
-
-## Part III. Mature and expanding market extension
-
-### Why this extension follows from the baseline
-
-The baseline and response-order experiments showed rapid convergence, path sensitivity, and minimal price exploration in a stationary market. This raised a direct follow-up question: if the market changes gradually, will an agent revise its stabilized pricing rule?
-
-### What was retained
-
-The dynamic experiment retains:
-
-- two simultaneously acting pricing agents;
-- the same price range, marginal cost, base demand calibration, and outside option;
-- paper response order;
-- private persistent notes;
-- both firms' price histories and own quantity/profit feedback; and
-- passive oversight with no visible flag feedback.
-
-### What was added
+This experiment asks whether an agent revises a stabilized rule when demand changes during the interaction. It retains the two-agent market, base calibration, price histories, own quantity/profit feedback, persistent notes, original response order, and passive oversight.
 
 | Factor | Values | Role |
 |---|---|---|
@@ -155,32 +83,11 @@ The dynamic experiment retains:
 | Industry description | Consumer retail, B2B software | Changes qualitative context only |
 | Seed | 0, 1, 2 | Measures run-to-run variation |
 
-In the mature condition, common product attractiveness remains fixed. In the expanding condition, it increases linearly from zero in round 1 to `0.1732867951` in round 40 and then remains constant. At symmetric price 2.00, this calibration changes the outside-option share from one third to one fifth.
+In the mature condition, common product attractiveness is constant. In the expanding condition, it rises linearly from zero in round 1 to 0.1732867951 in round 40 and then plateaus. At symmetric price 2.00, the outside-option share changes from one third to one fifth.
 
-Agents are told qualitatively that the market is mature or expanding, but they are not shown the numerical demand equation, growth path, current shift, equilibrium prices, or counterfactual profits. They must infer the magnitude of change from realized quantity and profit.
+Agents receive a qualitative mature/expanding description but not the demand equation, growth path, current shift, equilibrium prices, or counterfactual profits. They must infer the magnitude of change from realized quantity and profit.
 
-### API and stopping rule
-
-The 12 completed cells used:
-
-- `gemini-3.5-flash-lite`;
-- Google Gemini Developer API;
-- asynchronous `GenerateContent`;
-- schema-constrained JSON;
-- `store=false`;
-- passive oversight; and
-- paper response order.
-
-Convergence is checked every 5 rounds using a 20-round window. A cell cannot stop before round 60, which guarantees 20 observations after demand reaches its plateau in round 40. All 12 cells stopped at round 60.
-
-### Metrics
-
-- **Late-round price:** mean executed price across both agents in rounds 41–60.
-- **Dynamic price index:** zero at the round-specific symmetric Nash price and one at the round-specific symmetric joint-profit price.
-- **Unchanged decision:** the next price exactly equals the previous price.
-- **Small move:** absolute price change is no larger than 0.05.
-- **Stay after non-declining profit:** next price is unchanged when previous realized profit did not fall.
-- **Notes screen:** descriptive keyword counts, not a semantic or causal classifier.
+These 12 cells use asynchronous Gemini `GenerateContent`. Convergence is checked every 5 rounds over a 20-round window, with a minimum of 60 rounds to guarantee 20 post-plateau observations. Every cell stopped at round 60.
 
 At the demand plateau, the calibrated benchmarks are:
 
@@ -191,30 +98,27 @@ At the demand plateau, the calibrated benchmarks are:
 
 ### Results
 
-| Market | Late-round price | Dynamic price index | Unchanged | Move ≤ 0.05 | Stay after profit did not fall | Maintain/hold notes | Explore/test notes |
+| Market | Late-round price | Round-specific price index | Unchanged | Move ≤ 0.05 | Stay after profit did not fall | Maintain/hold notes | Explore/test notes |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | Mature | 2.038 | 1.249 | 96.2% | 100.0% | 99.1% | 73.2% | 1.5% |
 | Expanding | 2.088 | 1.058 | 90.5% | 98.9% | 95.8% | 88.6% | 3.6% |
 
-The paired expanding-minus-mature late-round difference averaged `+0.05` in both industry descriptions. The dynamic index was lower under expansion because the economic benchmarks increased more than the agents' prices.
+The expanding-minus-mature late-round price difference averaged +0.05 in both industry descriptions. The round-specific index was lower under expansion because the economic benchmarks increased more than the agents' prices.
 
-Most importantly, the inertia found in the paper-based baseline remained. Expanding-market agents changed slightly more often, but more than 90% of adjacent decisions were still unchanged and almost every adjustment was no larger than 0.05.
+Demand growth led to slightly more price changes, but more than 90% of adjacent decisions still repeated the previous price and almost every adjustment was no larger than 0.05. The dominant result is inertia rather than strong adaptation.
 
-## Part IV. What has been learned so far
+## Interpretation and current work
 
-The experimental progression supports four limited conclusions:
+The completed evidence supports three limited observations:
 
-1. the paper-based static-market implementation reproduces stable high passive prices and lower average prices under active oversight;
-2. moving the price field changes the terminal path, especially under passive oversight;
-3. neither stationary experiment produced substantial endogenous exploration; and
-4. adding gradual demand growth changed raw prices only slightly and did not remove the tendency to keep a locally satisfactory price.
+1. the LLM often locks into a stable price after little exploration;
+2. response-field order can change which stable path is reached; and
+3. gradual demand expansion produces only small adjustments under the current free-choice loop.
 
-These results do not show that high prices are necessarily collusive, that private notes caused inertia, or that three seeds estimate a general treatment effect precisely.
+The results do not show that stable high prices are necessarily collusive, that private notes caused inertia, or that three seeds estimate a general treatment effect precisely. Keyword counts from notes are descriptive screens, not semantic or causal classifiers.
 
-## Current work and method change
-
-We are validating the saved trajectories, benchmark calculations, and public reproduction code. Because the free-choice loop repeatedly produces tiny or zero price changes, the next experiment will use a different method to create more informative variation. That experiment has not yet been implemented and is not described as a completed result here.
+Because the current loop produces mostly zero or very small price changes, the next method will introduce more informative variation. That design has not yet been implemented and is not presented as a completed experiment.
 
 ## Contribution and limitations — TBD
 
-The final contribution and complete limitations section remain TBD. The confirmed limitations are one model family, three seeds per comparison, a stylized two-firm market, calibrated demand parameters, and known deviations between the completed baseline and the fully paper-aligned protocol.
+The final contribution and complete limitations section remain open. Confirmed limitations include one model family, three seeds per comparison, a stylized two-firm market, calibrated demand parameters, and known deviations between the completed static benchmark and the fully aligned oversight protocol.
