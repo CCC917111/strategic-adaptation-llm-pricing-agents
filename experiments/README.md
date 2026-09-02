@@ -1,27 +1,65 @@
-# Reproducing the Current Experiment
+# Reproducing the Completed Experiments
 
-## Included experiment
+The commands follow the same order as the research progression.
 
-The current main experiment is the 12-cell hidden-demand comparison:
-
-```text
-2 markets (mature, expanding)
-× 2 industry descriptions (retail, software)
-× 3 seeds (0, 1, 2)
-```
-
-Every completed cell used `gemini-3.5-flash-lite`, passive oversight, paper response order, and the Gemini `GenerateContent` method. The fixed design values are in `hidden-demand-design.json`.
-
-## Environment
-
-Install the project and Gemini dependency, then set your own key in the process environment. Never commit an `.env` file.
+## Installation
 
 ```bash
 python -m pip install -e '.[gemini]'
 export GEMINI_API_KEY='your-key'
 ```
 
-## Example run
+Never commit an `.env` file or API key.
+
+## 1. Paper-based baseline reproduction
+
+The baseline design is in `paper-baseline-design.json`. One paper-order passive cell can be run with:
+
+```bash
+python -m pricing_experiment.run_paper_baseline \
+  --mode passive \
+  --response-order paper \
+  --seed 0 \
+  --output experiments/results/paper_baseline_passive_seed0
+```
+
+Repeat for `passive`, `revision`, and `veto`, and for seeds 0–2.
+
+The defaults reproduce the completed archived implementation:
+
+- `gemini-3.5-flash-lite`;
+- Gemini Interactions API path;
+- paper response order;
+- static calibrated market;
+- fixed regulatory benchmark `1.473`;
+- 100 rounds; and
+- no online early stopping.
+
+This is intentionally labelled paper-based rather than exact. To use the later alignment corrections, add `--round-best-response --early-stop`; results from that corrected profile are not included as completed results in this repository.
+
+## 2. Response-order extension
+
+Use the same runner and change only:
+
+```bash
+--response-order price-last
+```
+
+For example:
+
+```bash
+python -m pricing_experiment.run_paper_baseline \
+  --mode passive \
+  --response-order price-last \
+  --seed 0 \
+  --output experiments/results/response_order_passive_seed0_price_last
+```
+
+The combined 18-cell result table is `results/preliminary-results.csv`.
+
+## 3. Mature and expanding market extension
+
+The dynamic design is in `hidden-demand-design.json`. One expanding retail cell can be run with:
 
 ```bash
 python -m pricing_experiment.run_live \
@@ -31,17 +69,23 @@ python -m pricing_experiment.run_live \
   --output experiments/results/hidden_demand_retail_expanding_seed0
 ```
 
-Repeat for both markets, both industries, and seeds 0–2. The defaults match the completed experiment: maximum 100 rounds, minimum 60 rounds, convergence checks every 5 rounds with a 20-round window, and a 2-second delay between rounds.
+Repeat for both markets, both industry descriptions, and seeds 0–2.
 
-The saved manifest records the requested model, API method, market treatment, scenario text, convergence configuration, and retry settings. API keys are never recorded.
+These defaults match the completed dynamic experiment:
 
-## Data included here
+- `gemini-3.5-flash-lite`;
+- Gemini `GenerateContent`;
+- passive oversight;
+- paper response order;
+- maximum 100 rounds and minimum 60 rounds; and
+- convergence checks every 5 rounds with a 20-round window.
 
-- `results/hidden-demand-summary.csv`: the 12 cell-level summaries used in the README.
-- `results/preliminary-results.csv`: an older response-order and oversight pilot, retained as a legacy record.
+## Included summaries
 
-Raw provider logs and text trajectories are not included yet. They require a separate metadata and privacy check before publication.
+- `results/paper-baseline-summary.csv`: 9 paper-order baseline cells.
+- `results/preliminary-results.csv`: the baseline plus 9 price-last extension cells.
+- `results/hidden-demand-summary.csv`: 12 mature/expanding cells.
 
-## Known reproducibility limit
+## Data-handling limit
 
-The completed trajectories were created before this public package contained the hidden-demand market implementation. The implementation has now been added and its calibration is tested, but a fresh end-to-end API rerun has not yet been completed with the public package. The current work is therefore a code-and-result audit, not a claim of independent reproduction.
+The repository includes sanitized code, fixed design files, and compact summaries. Raw provider logs and text trajectories are not included until their metadata has been checked. The hidden-demand implementation has passed calibration and offline integration checks, but a fresh end-to-end API rerun has not yet been completed from this public package.
