@@ -1,6 +1,6 @@
 # Reproducing the Completed Experiments
 
-The commands follow the same order as the research progression.
+The commands are grouped by the comparison they reproduce.
 
 ## Installation
 
@@ -11,7 +11,7 @@ export GEMINI_API_KEY='your-key'
 
 Never commit an `.env` file or API key.
 
-## 1. Paper-based baseline reproduction
+## Static-market benchmark
 
 The baseline design is in `paper-baseline-design.json`. One paper-order passive cell can be run with:
 
@@ -37,7 +37,7 @@ The defaults reproduce the completed archived implementation:
 
 This is intentionally labelled paper-based rather than exact. To use the later alignment corrections, add `--round-best-response --early-stop`; results from that corrected profile are not included as completed results in this repository.
 
-## 2. Response-order extension
+## Response-schema diagnostic
 
 Use the same runner and change only:
 
@@ -57,7 +57,7 @@ python -m pricing_experiment.run_paper_baseline \
 
 The combined 18-cell result table is `results/preliminary-results.csv`.
 
-## 3. Mature and expanding market extension
+## Mature and expanding demand
 
 The dynamic design is in `hidden-demand-design.json`. One expanding retail cell can be run with:
 
