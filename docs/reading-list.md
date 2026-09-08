@@ -9,7 +9,9 @@ This list follows the argument of the project. “Role here” distinguishes dir
 | [OECD (2025), *Algorithmic Pricing and Competition in G7 Jurisdictions*](https://doi.org/10.1787/f36dacf8-en) | Current adoption across sectors; separates explicit facilitation, shared-software arrangements, vertical restraints, and autonomous-learning risk | Main adoption and policy source |
 | [OECD (2023), *Algorithmic Competition*](https://doi.org/10.1787/cb3b2075-en) | Survey evidence on competitor monitoring and automated price adjustment; notes sparse autonomous-collusion cases | Quantitative adoption evidence |
 | [Spann et al. (2026), *Algorithmic Pricing: Implications for Marketing Strategy and Regulation*](https://doi.org/10.1016/j.ijresmar.2025.05.001) | Defines algorithmic pricing and reviews firm use across consumer, business, and platform markets | Business-practice synthesis |
-| [U.S. DOJ (2024), RealPage complaint announcement](https://www.justice.gov/archives/opa/pr/justice-department-sues-realpage-algorithmic-pricing-scheme-harms-millions-american-renters) | Alleged use of non-public competitor data through shared rent-pricing software | Real enforcement example; not autonomous LLM collusion |
+| [U.S. DOJ (2025), RealPage proposed settlement](https://www.justice.gov/opa/pr/justice-department-requires-realpage-end-sharing-competitively-sensitive-information-and) | Restricts current competitor data, price-alignment features, and certain information exchanges; adds monitoring | Real enforcement example; not autonomous LLM collusion |
+| [European Commission (2023), Horizontal Guidelines](https://competition-policy.ec.europa.eu/system/files/2023-07/2023_revised_horizontal_guidelines_en.pdf) | Treats collusion by code and commercially sensitive information exchange under existing competition rules | Regulatory categories and responsibility |
+| [Anthropic (2025), Project Vend](https://www.anthropic.com/research/project-vend-1) | A real pilot in which an LLM managed inventory and set prices | Direct seller-side demonstration; not evidence of broad deployment |
 | [OpenAI ACP](https://openai.com/index/buy-it-in-chatgpt/), [Google UCP](https://blog.google/products/ads-commerce/agentic-commerce-ai-tools-protocol-retailers-platforms/), [Visa Intelligent Commerce](https://investor.visa.com/news/news-details/2025/Find-and-Buy-with-AI-Visa-Unveils-New-Era-of-Commerce/) | Infrastructure for agent-assisted shopping, checkout, and payment | Evidence that agentic commerce is emerging; not evidence of widespread LLM seller pricing |
 
 ## 2. Collusion and mechanism identification
@@ -17,6 +19,7 @@ This list follows the argument of the project. “Role here” distinguishes dir
 | Work | What it establishes | Role here |
 |---|---|---|
 | [Calvano et al. (2020), *Artificial Intelligence, Algorithmic Pricing, and Collusion*](https://doi.org/10.1257/aer.20190623) | Q-learning agents can sustain supracompetitive prices with punishment-like responses | Foundational repeated-pricing result |
+| [Calvano et al. (2021), *Algorithmic Collusion with Imperfect Monitoring*](https://doi.org/10.1016/j.ijindorg.2021.102712) | Price-war punishments can arise when deviations and adverse demand shocks are confounded | Early move beyond perfect monitoring |
 | [Calvano et al. (2023), *Algorithmic Collusion: Genuine or Spurious?*](https://doi.org/10.1016/j.ijindorg.2023.102973) | High prices need not be supported by a reward–punishment policy | Defines the main identification problem |
 | [Abada and Lambin (2023), *Artificial Intelligence: Can Seemingly Collusive Outcomes Be Avoided?*](https://doi.org/10.1287/mnsc.2022.4623) | Imperfect exploration can create seemingly collusive outcomes | Directly relevant to observed inertia |
 | [Asker, Fershtman, and Pakes (2024), *The Impact of Artificial Intelligence Design on Pricing*](https://doi.org/10.1111/jems.12516) | Feedback and learner design change prices | Shows that the scaffold is part of the policy |
@@ -51,7 +54,7 @@ This list follows the argument of the project. “Role here” distinguishes dir
 
 | Work | What it establishes | Role here |
 |---|---|---|
-| Anto and Vazquez (2026), *Oversight Is Not Compliance* | Separates executed price, public justification, competitor-use disclosure, and persistent private notes under passive/revision/veto oversight | Experimental scaffold |
+| Anto and Vazquez (2026), *Oversight Is Not Compliance* | Separates executed price, public justification, competitor-use disclosure, and persistent private notes under passive/revision/veto oversight | Experimental scaffold; local source manuscript |
 | [Turpin et al. (2023), *Language Models Don't Always Say What They Think*](https://arxiv.org/abs/2305.04388) | Explanations can omit causally relevant features | Reasoning-faithfulness caution |
 | [Lanham et al. (2023), *Measuring Faithfulness in Chain-of-Thought Reasoning*](https://arxiv.org/abs/2307.13702) | Explanation faithfulness varies by task and model | Measurement caution |
 | [Shinn et al. (2023), *Reflexion*](https://arxiv.org/abs/2303.11366) | Stored verbal reflection can change later behavior | Explicit textual-memory precedent |
@@ -59,7 +62,7 @@ This list follows the argument of the project. “Role here” distinguishes dir
 
 ## Recommended reading order
 
-1. OECD (2025), then the RealPage materials, to separate deployed pricing risks from autonomous-collusion hypotheses.
+1. OECD (2025), the RealPage settlement, and the EU Horizontal Guidelines, to separate deployed pricing risks from autonomous-collusion hypotheses.
 2. Calvano (2020), Calvano (2023), Abada–Lambin, and Epivent–Lambin, to establish the mechanism-identification problem.
 3. Rotemberg–Saloner, Haltiwanger–Harrington, Bagwell–Staiger, and Ye, to understand why demand dynamics have ambiguous effects.
 4. Fish's latest revision, Luo, Keppo, Bazaar, and MerchantBench, to locate the current LLM boundary.
