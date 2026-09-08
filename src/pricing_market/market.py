@@ -1,4 +1,4 @@
-"""Regular-logit demand with a round-specific hidden demand shift."""
+"""Regular-logit demand for the stationary reference market."""
 
 from dataclasses import dataclass
 from math import exp
@@ -39,9 +39,9 @@ class LogitMarket:
         for price in prices:
             self._validate_price(price)
 
-        common_shift = self.config.demand_shift_at(round_index)
+        del round_index
         utilities = [
-            (self.config.quality + common_shift - price) / self.config.temperature
+            (self.config.quality - price) / self.config.temperature
             for price in prices
         ]
         normalization = max(0.0, *utilities)
@@ -49,7 +49,7 @@ class LogitMarket:
         outside_weight = exp(-normalization)
         denominator = outside_weight + sum(product_weights)
         shares = [weight / denominator for weight in product_weights]
-        market_size = self.config.market_size_at(round_index)
+        market_size = self.config.market_size
         firms = tuple(
             FirmOutcome(
                 price=price,
@@ -76,7 +76,7 @@ class LogitMarket:
 
         def objective(own_price: float) -> float:
             return self.evaluate(
-                (own_price, rival_price), round_index=round_index
+                (own_price, rival_price)
             ).firms[0].profit
 
         return self._golden_section_maximize(objective, tolerance=tolerance)
@@ -121,12 +121,12 @@ class LogitMarket:
         round_index: int | None = None,
         tolerance: float = 1e-10,
     ) -> float:
-        common_shift = self.config.demand_shift_at(round_index)
-        market_size = self.config.market_size_at(round_index)
+        del round_index
+        market_size = self.config.market_size
 
         def objective(price: float) -> float:
             utility = (
-                self.config.quality + common_shift - price
+                self.config.quality - price
             ) / self.config.temperature
             normalization = max(0.0, utility)
             product_weight = exp(utility - normalization)
