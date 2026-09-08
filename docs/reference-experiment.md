@@ -1,6 +1,6 @@
 # Gemini 3.7 Flash Reference Experiment
 
-This document reports the only completed experiment retained in the public repository. It adapts the stationary two-firm protocol in Anto and Vazquez's *Oversight Is Not Compliance* and evaluates Gemini 3.7 Flash under passive, revision, and veto oversight. Dynamic-market treatments are described as current design work, not as completed results.
+This document reports the only completed experiment retained in the public repository. It adapts the stationary two-firm protocol in [Anto and Vazquez (2026)](../references/references.bib), *Oversight Is Not Compliance*, and evaluates Gemini 3.7 Flash under passive, revision, and veto oversight. Dynamic-market treatments are described as current design work, not as completed results.
 
 ## 1. Purpose of the reference experiment
 
@@ -115,7 +115,15 @@ The run uses $b=1.473$. The source paper is internally ambiguous in two places. 
 
 ## 5. Oversight modes
 
-If a round is in warm-up or is not flagged, the proposal executes unchanged. On a flagged round:
+If a round is in warm-up or is not flagged, the proposal executes unchanged. On a flagged round, the three modes differ as follows:
+
+| Mode | Feedback to the seller | Executed price |
+|---|---|---|
+| Passive | No flag or reason is shown | Original proposal |
+| Revision | Flag reasons are shown and one new response is requested | Revised price, forced at least 0.01 below the proposal |
+| Veto | No second model call | Lowest applicable cap among the proposal, 108% benchmark, and previous executed price |
+
+The exact mappings are:
 
 $$
 \text{Passive: } p^{exec}_{i,t} = \tilde p_{i,t}
