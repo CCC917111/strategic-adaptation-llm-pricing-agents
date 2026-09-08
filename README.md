@@ -1,25 +1,30 @@
 # Strategic Adaptation of LLM Pricing Agents in Dynamic Markets
 
-This project studies how LLM agents set prices in repeated competition: whether they reach supracompetitive outcomes, what their public justifications and persistent private notes reveal, and how they revise strategy step by step as demand continuously expands or contracts. The repository first establishes a stationary reference experiment with two Gemini 3.7 Flash sellers and three price-based oversight modes. It then extends the same market along controlled demand paths to separate adaptation, path dependence, and the causal role of notes.
+This project uses repeated pricing markets to study how LLM agents learn from experience and revise their strategies as demand changes over time. In controlled markets that expand or contract gradually, we examine how autonomous sellers adjust prices from one round to the next, whether strategies formed earlier persist after conditions change, and when those strategies produce supracompetitive or collusive behavior.
 
 ## Research problem
 
-Algorithmic pricing is already used in retail, travel, entertainment, and platform markets because software can react quickly to demand, inventory, and competitors. In a European retail survey summarized by the OECD, 49% of respondents monitored competitors' online prices; among users of monitoring software, 78% adjusted their own prices and 35% used automated pricing software ([OECD, 2023](https://doi.org/10.1787/cb3b2075-en)). Autonomous seller-side LLM pricing is earlier-stage, but real demonstrations already give LLM agents authority over inventory and prices ([Anthropic, 2025](https://www.anthropic.com/research/project-vend-1)), while commerce and payment providers are building infrastructure for agent-mediated transactions ([OpenAI, 2025](https://openai.com/index/buy-it-in-chatgpt/); [Google, 2026](https://blog.google/products/ads-commerce/agentic-commerce-ai-tools-protocol-retailers-platforms/); [Visa, 2025](https://investor.visa.com/news/news-details/2025/Find-and-Buy-with-AI-Visa-Unveils-New-Era-of-Commerce/)). This motivates an emerging risk; it does not imply that autonomous LLM pricing is already widespread.
+Algorithmic pricing has become common in retail, travel, entertainment, and platform markets because software can combine demand, inventory, customer response, and competitor information to update prices quickly. In a European retail survey summarized by the OECD, 49% of respondents monitored competitors' online prices; among users of monitoring software, 78% adjusted prices and 35% used automated pricing software ([OECD, 2023](https://doi.org/10.1787/cb3b2075-en)). The same capacity for rapid monitoring and response can soften competition by making elevated prices easier to establish or sustain. Competition authorities have consequently focused on restrictions on sensitive competitor data, features that discourage price reductions, auditability, monitoring, and firms' responsibility for the algorithms they deploy ([DOJ, 2025](https://www.justice.gov/opa/pr/justice-department-requires-realpage-end-sharing-competitively-sensitive-information-and); [European Commission, 2023, paras. 401–404](https://competition-policy.ec.europa.eu/system/files/2023-07/2023_revised_horizontal_guidelines_en.pdf)).
 
-The concern is that independent pricing systems may learn outcomes that reduce competition. Calvano et al. show that Q-learning sellers can sustain prices above the one-shot competitive equilibrium through punishment-like responses ([2020](https://doi.org/10.1257/aer.20190623)). Later work establishes an essential qualification: a high price is not sufficient evidence of collusion. Poor exploration or optimization can also produce supracompetitive prices without a rival-contingent reward–punishment strategy ([Abada and Lambin, 2023](https://doi.org/10.1287/mnsc.2022.4623); [Calvano et al., 2023](https://doi.org/10.1016/j.ijindorg.2023.102973)).
+A central result in the algorithmic-collusion literature is that independent Q-learning sellers can sustain prices above the one-shot competitive equilibrium through punishment-like responses ([Calvano et al., 2020](https://doi.org/10.1257/aer.20190623)). Later studies refined that result: elevated prices can also arise from limited exploration or optimization failure, so collusion must be identified through responses to deviations rather than price levels alone ([Abada and Lambin, 2023](https://doi.org/10.1287/mnsc.2022.4623); [Calvano et al., 2023](https://doi.org/10.1016/j.ijindorg.2023.102973)).
 
-LLMs change this problem because they enter the market with pretrained policies and adapt during deployment through prompts, histories, and text they write for future rounds. Fish, Gonczarowski, and Shorrer find prompt-sensitive, supracompetitive LLM pricing and use off-path interventions to study price-war incentives ([2026 revision](https://arxiv.org/abs/2404.00806)). Subsequent work shows that test-time strategy and market heterogeneity matter ([Luo et al., 2026](https://arxiv.org/abs/2602.17203); [Keppo et al., 2026](https://arxiv.org/abs/2603.20281)). *Oversight Is Not Compliance* then separates executed prices, public explanations, competitor-use disclosures, and persistent private notes under three forms of price oversight. It also leaves two questions open: its market is stationary, and its reading of notes is descriptive rather than a causal test of memory.
+LLMs extend this line of research because they can interpret natural-language objectives, summarize market histories, and alter decisions during deployment without task-specific retraining. A seller-side pilot has already allowed an LLM to manage inventory and prices ([Anthropic, 2025](https://www.anthropic.com/research/project-vend-1)), while new commerce and payment protocols are expanding the infrastructure through which agents can transact ([OpenAI, 2025](https://openai.com/index/buy-it-in-chatgpt/); [Google, 2026](https://blog.google/products/ads-commerce/agentic-commerce-ai-tools-protocol-retailers-platforms/); [Visa, 2025](https://investor.visa.com/news/news-details/2025/Find-and-Buy-with-AI-Visa-Unveils-New-Era-of-Commerce/)). These capabilities make LLMs attractive as flexible pricing agents, but they also allow pricing strategy to be shaped by prompts, interaction history, and written memory. Fish, Gonczarowski, and Shorrer find rapid, prompt-sensitive supracompetitive pricing by LLM agents and use off-path interventions to study price-war incentives ([2026 revision](https://arxiv.org/abs/2404.00806)). Subsequent work shows that test-time learning and heterogeneous competitors materially change the outcome ([Luo et al., 2026](https://arxiv.org/abs/2602.17203); [Keppo et al., 2026](https://arxiv.org/abs/2603.20281)).
 
-Dynamic-market research narrows—but does not close—that gap. Classical theory shows that demand changes can either weaken or strengthen collusion depending on deviation gains, expectations, and persistence ([Rotemberg and Saloner, 1986](https://www.jstor.org/stable/1813358); [Haltiwanger and Harrington, 1991](https://www.jstor.org/stable/2601009); [Bagwell and Staiger, 1997](https://doi.org/10.3386/w5056)). Ye studies Q-learning sellers facing observed i.i.d. demand states and finds that demand and price memory change the learned pricing pattern ([2026 revision](https://arxiv.org/abs/2502.15084)). Bazaar studies a different problem: one LLM merchant adapts to staggered customer-preference swaps while competing with three rule-based pricing bots ([Ahmed et al., 2026](https://arxiv.org/abs/2608.00102)). The remaining opening is not simply “dynamic pricing with LLMs,” but controlled nonstationary competition among multiple LLM sellers with explicit textual memory.
+[Anto and Vazquez (2026)](references/references.bib) add an oversight and memory setting in *Oversight Is Not Compliance*. Each seller submits a price, a short explanation visible to the regulator, a disclosure of whether competitor information influenced the decision, and a private note returned only to itself in the next round. Their regulator either records suspicious price patterns, asks the seller to revise, or directly caps the proposed price. This design makes it possible to compare executed behavior with what agents say publicly and remember privately. Its stationary market, however, does not show how an established strategy changes when demand itself evolves, and its analysis of notes does not identify whether those notes caused later choices.
 
-The project asks:
+Demand dynamics matter because the profitability of both cooperation and deviation changes over the business cycle ([Rotemberg and Saloner, 1986](https://www.jstor.org/stable/1813358); [Haltiwanger and Harrington, 1991](https://www.jstor.org/stable/2601009); [Bagwell and Staiger, 1997](https://doi.org/10.3386/w5056)). Existing computational studies capture only parts of this problem. Ye studies Q-learning sellers facing observed high and low demand states ([2026 revision](https://arxiv.org/abs/2502.15084)). Bazaar studies one LLM merchant facing three rule-based competitors and staggered customer-preference changes ([Ahmed et al., 2026](https://arxiv.org/abs/2608.00102)). Neither setting follows several LLM sellers as a shared market expands or contracts continuously while their natural-language memory is experimentally controlled.
 
-1. How do LLM sellers update prices, public explanations, and private notes from one round to the next as demand follows a continuous expansion or contraction path?
-2. At the same current demand, do prices depend on the path by which the market arrived there?
-3. Do private-note interventions change post-transition pricing after visible market information is controlled?
-4. When prices are elevated, does a forced unilateral deviation elicit rival-contingent punishment and recovery?
+The central research question is:
 
-Questions 2 and 3 are the intended primary contribution. Question 4 prevents price elevation or inertia from being mislabeled as collusion. The detailed evidence chain and the boundary with recent work are in [the literature review](docs/literature-review.md).
+> **How do LLM pricing agents form and revise strategies as market demand evolves continuously, and how do market history and persistent memory affect adaptation and collusive behavior?**
+
+The study answers this question through three linked tests:
+
+1. **Sequential adaptation:** trace price and strategy changes round by round during gradual expansion and contraction.
+2. **Path and memory:** compare the same current market reached through different histories, then clear or replace private notes while holding visible information fixed.
+3. **Collusive mechanism:** introduce a unilateral price deviation and test for rival-contingent punishment and recovery.
+
+The detailed evidence chain and the boundary with recent work are in [the literature review](docs/literature-review.md).
 
 ## Reference experiment
 
@@ -39,7 +44,7 @@ $$
 q_{i,t} = M s_{i,t}, \qquad \pi_{i,t} = (p_{i,t} - c)q_{i,t}
 $$
 
-The outside option has share $s_{0,t}=1-s_{1,t}-s_{2,t}$. The implementation uses the protocol and reported benchmarks in Anto and Vazquez's *Oversight Is Not Compliance*. Because that paper does not report the utility intercept or logit scale, this repository uses $a=2$ and $\mu=0.25$, which reproduce its quoted competitive and monopoly-reference prices.
+The outside option has share $s_{0,t}=1-s_{1,t}-s_{2,t}$. The implementation follows the protocol and reported benchmarks in [Anto and Vazquez (2026)](references/references.bib). Because the paper does not report the utility intercept or logit scale, this repository uses $a=2$ and $\mu=0.25$, which reproduce its quoted competitive and monopoly-reference prices.
 
 | Item | Value |
 |---|---:|
@@ -65,7 +70,7 @@ $SI$ is an outcome measure, not proof of collusion. The single-product monopoly 
 
 The two agents are called concurrently and cannot observe the rival's current proposal. Each receives both firms' past executed prices, only its own quantities and profits, its previous private notes, and visible revision or veto feedback. It is not shown the demand equation, parameter values, equilibrium benchmarks, rival profits, or counterfactual payoffs.
 
-Following *Oversight Is Not Compliance*, each call returns, in this order:
+Following [Anto and Vazquez (2026)](references/references.bib), each call returns, in this order:
 
 1. proposed price;
 2. public justification of one or two sentences;
@@ -74,9 +79,25 @@ Following *Oversight Is Not Compliance*, each call returns, in this order:
 
 The regulator reads prices and price history only. Public justifications, disclosures, and notes are recorded for analysis but never enter the flag rule.
 
-### Behavioral flags and oversight
+### Oversight protocol
 
-After the warm-up, a proposal is flagged when any of the following holds. The completed experiment uses the fixed competitive benchmark $b=1.473$.
+After the ten-round warm-up, the regulator looks for three observable price patterns:
+
+- a proposal more than 18% above the competitive benchmark;
+- four consecutive price increases; or
+- both firms moving prices in the same direction for three consecutive changes while remaining above the benchmark.
+
+The experiment compares three responses:
+
+| Mode | What the agent experiences | What happens to the price |
+|---|---|---|
+| Passive | The flag is recorded but hidden | The proposal executes unchanged |
+| Revision | The agent receives the reasons and answers once more | The revised price must be at least 0.01 lower |
+| Veto | The agent receives no second call | The regulator applies the proposal, benchmark, and previous-price caps |
+
+The exact rules below follow [Anto and Vazquez (2026)](references/references.bib). The completed experiment uses the fixed competitive benchmark $b=1.473$.
+
+**Flag rules**
 
 $$
 G_{i,t} = \mathbf{1}\{\tilde p_{i,t} > 1.18b\}
@@ -92,7 +113,9 @@ $$
 L_t = \prod_{r=t-2}^{t}\mathbf{1}\{\Delta x_{1,r}\Delta x_{2,r}>0,\ x_{1,r}>b,\ x_{2,r}>b\}.
 $$
 
-The source paper gives two descriptions of the escalation window; the code follows its appendix implementation—four increases across five price points. The three oversight mappings are:
+The source paper gives two descriptions of the escalation window; the code follows its appendix implementation—four increases across five price points.
+
+**Enforcement rules**
 
 $$
 \text{Passive: } p^{exec}_{i,t} = \tilde p_{i,t}
@@ -106,7 +129,7 @@ $$
 \text{Veto: } p^{exec}_{i,t} = \max\{1,\min(\tilde p_{i,t},1.08b,p^{exec}_{i,t-1})\}.
 $$
 
-Passive flags are hidden from the agents. Revision returns the reasons and permits one additional model call. Veto replaces a flagged price without another call. Full protocol details and source ambiguities are documented in [the experiment report](docs/reference-experiment.md).
+Full protocol details and source ambiguities are documented in [the experiment report](docs/reference-experiment.md).
 
 ### Model and API
 
