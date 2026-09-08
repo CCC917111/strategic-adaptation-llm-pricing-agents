@@ -10,7 +10,7 @@ from .models import (
     PricingDecision,
     RevisionRequest,
 )
-from .prompts import PromptConfig, PromptFactory, PromptTreatment, ResponseOrder
+from .prompts import PromptConfig, PromptFactory
 from .resilience import RetryingModelClient
 
 __all__ = [
@@ -23,8 +23,6 @@ __all__ = [
     "PricingDecision",
     "PromptConfig",
     "PromptFactory",
-    "PromptTreatment",
-    "ResponseOrder",
     "RevisionRequest",
     "RetryingModelClient",
     "ScriptedModelClient",
