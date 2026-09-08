@@ -1,91 +1,67 @@
-# Reproducing the Completed Experiments
+# Run the Gemini 3.7 Flash reference experiment
 
-The commands are grouped by the comparison they reproduce.
+The repository exposes one experiment: the stationary two-firm reference protocol in `gemini37-reference-design.json`.
 
-## Installation
+## Install
 
 ```bash
-python -m pip install -e '.[gemini]'
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e '.[gemini,test]'
+```
+
+Never commit an API key or populated `.env` file.
+
+## Official Google transport
+
+```bash
 export GEMINI_API_KEY='your-key'
-```
-
-Never commit an `.env` file or API key.
-
-## Static-market benchmark
-
-The baseline design is in `paper-baseline-design.json`. One paper-order passive cell can be run with:
-
-```bash
-python -m pricing_experiment.run_paper_baseline \
+python -m pricing_experiment.run_reference_experiment \
+  --transport google \
   --mode passive \
-  --response-order paper \
   --seed 0 \
-  --output experiments/results/paper_baseline_passive_seed0
+  --output experiments/results/gemini37_passive_seed0
 ```
 
-Repeat for `passive`, `revision`, and `veto`, and for seeds 0–2.
+The runner pins:
 
-The defaults reproduce the completed archived implementation:
+- model `gemini-3.7-flash`;
+- thinking level `high`;
+- no explicit temperature;
+- Google Gen AI `GenerateContent`;
+- paper-order structured JSON;
+- a fixed regulatory benchmark of 1.473; and
+- convergence checks from round 40 through a maximum of 100 rounds.
 
-- `gemini-3.5-flash-lite`;
-- Gemini Interactions API path;
-- paper response order;
-- static calibrated market;
-- fixed regulatory benchmark `1.473`;
-- 100 rounds; and
-- no online early stopping.
+Repeat the command for `passive`, `revision`, and `veto`, and use independent seeds.
 
-This is intentionally labelled paper-based rather than exact. To use the later alignment corrections, add `--round-best-response --early-stop`; results from that corrected profile are not included as completed results in this repository.
+## OpenAI-compatible relay
 
-## Response-schema diagnostic
-
-Use the same runner and change only:
+The recorded runs used a YunZhuHub relay after Google capacity limits. The adapter is provider-neutral and requires an HTTPS base URL:
 
 ```bash
---response-order price-last
-```
-
-For example:
-
-```bash
-python -m pricing_experiment.run_paper_baseline \
+export GEMINI_OPENAI_COMPATIBLE_BASE_URL='https://your-relay.example/v1'
+export GEMINI_OPENAI_COMPATIBLE_API_KEY='your-key'
+python -m pricing_experiment.run_reference_experiment \
+  --transport openai-compatible \
   --mode passive \
-  --response-order price-last \
   --seed 0 \
-  --output experiments/results/response_order_passive_seed0_price_last
+  --output experiments/results/gemini37_passive_seed0_relay
 ```
 
-The combined 18-cell result table is `results/preliminary-results.csv`.
+Do not combine transports within a new run. The completed seed 0 passive cell did switch transport at round 13, so it is retained as descriptive validation rather than a clean replication cell.
 
-## Mature and expanding demand
+## Outputs
 
-The dynamic design is in `hidden-demand-design.json`. One expanding retail cell can be run with:
+Each run directory contains:
+
+- `manifest.json`: fixed configuration, progress, and stopping reason;
+- `rounds.jsonl`: proposals, text fields, flags, executed prices, market outcomes, and call metadata.
+
+The repository includes only the sanitized six-cell summary at `results/gemini37-reference-summary.csv`. Raw provider traces and credentials are excluded.
+
+## Offline verification
 
 ```bash
-python -m pricing_experiment.run_live \
-  --market expanding \
-  --industry retail \
-  --seed 0 \
-  --output experiments/results/hidden_demand_retail_expanding_seed0
+python -m pytest -q
 ```
-
-Repeat for both markets, both industry descriptions, and seeds 0–2.
-
-These defaults match the completed dynamic experiment:
-
-- `gemini-3.5-flash-lite`;
-- Gemini `GenerateContent`;
-- passive oversight;
-- paper response order;
-- maximum 100 rounds and minimum 60 rounds; and
-- convergence checks every 5 rounds with a 20-round window.
-
-## Included summaries
-
-- `results/paper-baseline-summary.csv`: 9 paper-order baseline cells.
-- `results/preliminary-results.csv`: the baseline plus 9 price-last extension cells.
-- `results/hidden-demand-summary.csv`: 12 mature/expanding cells.
-
-## Data-handling limit
-
-The repository includes sanitized code, fixed design files, and compact summaries. Raw provider logs and text trajectories are not included until their metadata has been checked. The hidden-demand implementation has passed calibration and offline integration checks, but a fresh end-to-end API rerun has not yet been completed from this public package.
