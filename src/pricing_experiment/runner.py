@@ -39,14 +39,12 @@ class GameRunner:
         agents: tuple[PricingAgent, PricingAgent],
         market: LogitMarket,
         regulator: Regulator,
-        use_round_best_response_benchmark: bool = False,
     ) -> None:
         if agents[0].state.firm_id != 0 or agents[1].state.firm_id != 1:
             raise ValueError("agents must be ordered as firm 0, firm 1.")
         self.agents = agents
         self.market = market
         self.regulator = regulator
-        self.use_round_best_response_benchmark = use_round_best_response_benchmark
         self.rounds: list[ExperimentRound] = []
         self._agent_histories: tuple[list[ObservedRound], list[ObservedRound]] = (
             [],
@@ -72,22 +70,10 @@ class GameRunner:
         )
         proposals = proposal_list[0], proposal_list[1]
         proposed_prices = proposals[0].price, proposals[1].price
-        benchmark_prices = None
-        if self.use_round_best_response_benchmark:
-            benchmark_prices = (
-                self.market.best_response(
-                    proposed_prices[1], round_index=round_index
-                ),
-                self.market.best_response(
-                    proposed_prices[0], round_index=round_index
-                ),
-            )
-
         assessments = self.regulator.assess_round(
             round_index=round_index,
             proposed_prices=proposed_prices,
             price_history=[row.executed_prices for row in self.rounds],
-            benchmark_prices=benchmark_prices,
         )
         revisions = await self._request_revisions(
             base_turns=base_turns,
@@ -111,10 +97,7 @@ class GameRunner:
             )
             for firm_id in range(2)
         )
-        market_outcome = self.market.evaluate(
-            executed_prices,
-            round_index=round_index,
-        )
+        market_outcome = self.market.evaluate(executed_prices)
 
         result = ExperimentRound(
             round_index=round_index,
