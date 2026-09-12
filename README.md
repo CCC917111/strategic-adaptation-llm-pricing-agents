@@ -18,11 +18,11 @@ The central research question is:
 
 > **How do LLM pricing agents form and revise strategies as market demand evolves continuously, and how do market history and persistent memory affect adaptation and collusive behavior?**
 
-The study answers this question through three linked tests:
+The first test defines the current research direction. The other two are candidate extensions and have not yet been locked into the experimental design:
 
 1. **Sequential adaptation:** trace price and strategy changes round by round during gradual expansion and contraction.
-2. **Path and memory:** compare the same current market reached through different histories, then clear or replace private notes while holding visible information fixed.
-3. **Collusive mechanism:** introduce a unilateral price deviation and test for rival-contingent punishment and recovery.
+2. **Proposed extension — path and memory (under consideration):** compare the same current market reached through different histories, then clear or replace private notes while holding visible information fixed.
+3. **Proposed extension — collusive mechanism (under consideration):** introduce a unilateral price deviation and test for rival-contingent punishment and recovery.
 
 The detailed evidence chain and the boundary with recent work are in [the literature review](docs/literature-review.md).
 
@@ -93,7 +93,7 @@ The experiment compares three responses:
 |---|---|---|
 | Passive | The flag is recorded but hidden | The proposal executes unchanged |
 | Revision | The agent receives the reasons and answers once more | The revised price must be at least 0.01 lower |
-| Veto | The agent receives no second call | The regulator applies the proposal, benchmark, and previous-price caps |
+| Veto | The agent receives no second call | The executed price is the lowest of the proposal, 1.08 times the benchmark, and its previous price, with a floor of 1.00 |
 
 The exact rules below follow [Anto and Vazquez (2026)](references/references.bib). The completed experiment uses the fixed competitive benchmark $b=1.473$.
 
@@ -117,6 +117,8 @@ The source paper gives two descriptions of the escalation window; the code follo
 
 **Enforcement rules**
 
+During warm-up and whenever no flag is raised, the proposal executes unchanged. The revision and veto mappings below apply only to flagged proposals after warm-up. For example, with a proposal of 1.90, a previous price of 1.80, and $b=1.473$, veto executes 1.59084.
+
 $$
 \text{Passive: } p^{exec}_{i,t} = \tilde p_{i,t}
 $$
@@ -133,11 +135,15 @@ Full protocol details and source ambiguities are documented in [the experiment r
 
 ### Model and API
 
-The public reference runs use model ID `gemini-3.7-flash`, `thinking_level=high`, the paper-order response schema, seed-controlled calls, and no explicit temperature. Calls use structured JSON output. The official route is the Google Gen AI SDK `GenerateContent` endpoint; due to provider-capacity limits, the recorded runs used a YunZhuHub OpenAI-compatible relay for five cells and for the continuation of one cell. Every call remained stateless at the provider layer: history and private notes were supplied explicitly in the prompt.
+The reference records use the model identifier `gemini-3.7-flash`, a requested `high` thinking setting, seeds 0 and 1, and no explicit temperature. Each call returns structured JSON, with market history and the previous private note supplied explicitly in the prompt.
 
-This transport difference is disclosed because it may affect reproducibility. It is not treated as an experimental factor, and the two seeds are not pooled into a causal estimate.
+The runnable code uses the **official Google Gen AI API** with a reader's own `GEMINI_API_KEY`. The historical results include third-party transport, detailed in [API provenance](docs/reference-experiment.md#7-model-and-api-provenance). They provide a stationary reference observation; an all-official run is a new replication, and identical outputs are not guaranteed.
 
 ### Completed results
+
+![Executed prices for both firms across two seeds and three oversight modes](results/figures/price_trajectories_seed0_seed1.png)
+
+Each row is one seed and each column one oversight mode. Thin lines show individual firms; the thick line is their mean. The vertical dotted line marks the end of warm-up. Horizontal lines mark the competitive price (1.473) and the single-product monopoly reference (1.802). Runs end at different rounds under the same stopping rule.
 
 The table reports mean executed price over the final 20 rounds.
 
@@ -155,23 +161,23 @@ The table reports mean executed price over the final 20 rounds.
 | 1 | Revision | 55 | 0.128 | 6 | 6 |
 | 1 | Veto | 45 | 0.257 | 3 | 3 |
 
-These runs establish that the implementation can reproduce stable, supracompetitive pricing under the reference protocol. They do **not** establish a stable ranking of oversight modes: revision ends above passive in seed 0 but below it in seed 1. Across all six cells after warm-up, 59.3% of consecutive proposals are unchanged and 97.8% change by no more than 0.05. The agents frequently preserve a profitable incumbent price and conduct only local tests, making the current setup weak for identifying rapid adaptation. Text-judge labels have not yet been run, so no quantitative claim about note content is reported.
+The six runs finish above the competitive benchmark. Revision finishes above passive in seed 0 and below it in seed 1, so these two seeds do not establish a stable ordering of oversight modes. Of 400 within-firm proposal changes with destination rounds 11 onward, 237 are unchanged (59.25%) and 391 are at most 0.05 in magnitude (97.75%). This price persistence motivates examining how the agents respond when demand changes.
 
-The cell-level data are in [results/gemini37-reference-summary.csv](results/gemini37-reference-summary.csv).
+The repository includes [all 520 price records](results/gemini37-price-trajectories.csv), the [six-cell summary](results/gemini37-reference-summary.csv), and [20 text examples](results/gemini37-text-examples.csv). The examples contain both firms' final-round records in all six runs and every revision record. They illustrate written plans and responses to oversight; no strategy coding or causal analysis of notes has been performed. See [the experiment report](docs/reference-experiment.md#8-results) for the small descriptive analysis and [the data guide](results/README.md) for field definitions and provenance.
 
 ## Dynamic extension now being designed
 
-The main experiment keeps the same two-agent interface and separates three objects that the current static experiment confounds:
+The continuous demand path is the core extension currently being designed. Two additional identification strategies remain under consideration:
 
-| Object | Comparison |
+| Component | Current position |
 |---|---|
-| Market path | stationary maturity, expansion to the same endpoint, and contraction to the same endpoint |
-| Visible evidence | matched recent observation window at the post-transition comparison point |
-| Persistent notes | retained, cleared, sanitized, or transplanted at a common checkpoint |
+| Continuous market path | Core direction: gradual expansion and contraction, compared with a stationary market |
+| Matched histories and visible evidence | Proposed extension; exact branching and matching procedure is TBD |
+| Persistent-note intervention | Proposed extension; retaining, clearing, sanitizing, or transplanting notes is under consideration |
 
-Demand will change continuously rather than jump between a small number of named states, and agents will infer the change from outcomes rather than receive labels such as “growth” or “mature.” Round-by-round changes in price, public explanation, private notes, quantity, and profit will be aligned with round-specific competitive and joint-profit benchmarks. All branches will share the same current market primitives at the comparison point. A forced one-firm price deviation will be analyzed separately from the demand transition.
+Demand will change continuously rather than jump between a small number of named states, and agents will infer the change from outcomes rather than receive labels such as “growth” or “mature.” Round-by-round changes in price, public explanation, private notes, quantity, and profit will be aligned with round-specific competitive and joint-profit benchmarks. Matched-endpoint branches, note interventions, and a forced one-firm price deviation are possible additions; none has yet been finalized or run.
 
-This design is necessary because a smooth demand curve alone would only be another environmental parameter sweep. The contribution requires matched endpoints and interventions that distinguish current demand, observed history, and textual memory. Exact trajectory, model set, replication count, monopoly control, contribution statement, and limitations remain **TBD until the design is locked**.
+A smooth demand curve alone would primarily characterize behavior under nonstationarity. Stronger causal claims would require additional controls or interventions that distinguish current demand, observed history, and textual memory. The exact trajectory, model set, replication count, matched-history design, note treatment, deviation probe, contribution statement, and limitations remain **TBD until the design is locked**.
 
 ## Reproduce the reference experiment
 
@@ -193,7 +199,7 @@ python -m pricing_experiment.run_reference_experiment \
   --output experiments/results/gemini37_passive_seed0
 ```
 
-Repeat for `passive`, `revision`, and `veto`. See [experiments/README.md](experiments/README.md) for the relay option and the exact stopping rule.
+Repeat for `passive`, `revision`, and `veto`. The default model identifier is the one recorded in the reference experiment; use `--model` to select a model available to your Google account and record it as a new run. See [experiments/README.md](experiments/README.md) for API setup, saved outputs, the stopping rule, and offline plot reproduction.
 
 Run offline checks:
 
@@ -210,6 +216,6 @@ python -m pytest -q
 | `src/pricing_regulator/` | Price flags and passive/revision/veto execution |
 | `src/pricing_experiment/` | Simultaneous round loop, stopping rule, and checkpoints |
 | `experiments/` | Fixed Gemini 3.7 reference design and commands |
-| `results/` | Sanitized cell-level summaries |
+| `results/` | Price trajectories, figures, six-cell summary, and selected text records |
 | `tests/` | Market calibration and persistence checks |
 | `docs/` | Literature review, reading list, and detailed experiment report |
