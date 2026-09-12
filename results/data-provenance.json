@@ -1,0 +1,115 @@
+{
+  "source_bundle": "gemini_3_7_flash_high_seed0_seed1_report_20260902",
+  "source_files": [
+    {
+      "name": "decision_text_channels_seed0_seed1.csv",
+      "sha256": "37da70f7c8b69fbcc6c4cbf72699c6b0bfcdda546a7260cba05ff58030b6a8dd"
+    },
+    {
+      "name": "seed0_detailed_summary.json",
+      "sha256": "f57fcbc573ee6cf623425d2625692fbab4cb22bd0ac5929e382d5f4c80c0ac2e"
+    },
+    {
+      "name": "seed1_detailed_summary.json",
+      "sha256": "741aecb1ac5e90efd3f9c4961e39b2e2acf289e32e2d1577e85db1f9d09e953e"
+    },
+    {
+      "name": "figures/price_trajectories_seed0_seed1.png",
+      "sha256": "fe291a75e14b4a8f024c211c506bea99f86b1c904307a4a62ede5b13959f8d54"
+    },
+    {
+      "name": "figures/supracompetitive_index_seed0_seed1.png",
+      "sha256": "647d7011652c8ce413b7455e173ef170791e3d4805a54db0bf53b8ba575d9035"
+    }
+  ],
+  "published_files": [
+    {
+      "name": "gemini37-price-trajectories.csv",
+      "sha256": "4633dab9c710e4e59db6937fb317ada8bd05b128853ff291171d5f68b1e49be8"
+    },
+    {
+      "name": "gemini37-text-examples.csv",
+      "sha256": "b0d691ab478e048502a48273c352aaba0f1a3e664dd09c081992fca87b5fcf0e"
+    },
+    {
+      "name": "gemini37-reference-summary.csv",
+      "sha256": "7c1ee54c7e2c4116cdda652cba57fddc781d192e4940a31c1ad928254723d3d3"
+    },
+    {
+      "name": "figures/price_trajectories_seed0_seed1.png",
+      "sha256": "fe291a75e14b4a8f024c211c506bea99f86b1c904307a4a62ede5b13959f8d54"
+    },
+    {
+      "name": "figures/supracompetitive_index_seed0_seed1.png",
+      "sha256": "647d7011652c8ce413b7455e173ef170791e3d4805a54db0bf53b8ba575d9035"
+    }
+  ],
+  "source_scope": "Combined report CSV and two report summaries; original per-call manifests and rounds.jsonl were not available in this bundle.",
+  "api_provenance": "Transport split is taken from the historical experiment documentation; upstream relay identity and equivalence have not been independently verified.",
+  "text_selection": {
+    "rule": "Both firms at the final recorded round of each run, plus every record with nonempty revision_private_notes.",
+    "timing": "Retrospective deterministic selection, not preregistered.",
+    "terminal_records": 12,
+    "revision_records": 8,
+    "overlap": 0,
+    "total_records": 20,
+    "text_transformation": "None; selected public/private text fields are copied verbatim.",
+    "source_csv_record": "One-based data-record position excluding header; not physical line number.",
+    "labels": "No strategy labels or text-judge scores."
+  },
+  "validation": {
+    "price_records": 520,
+    "market_rounds": 260,
+    "unique_run_round_firm_keys": 520,
+    "complete_round_sequences": true,
+    "six_final_window_means_match": true,
+    "six_supracompetitive_indices_match": true,
+    "proposal_transitions_destination_round_11_onward": 400,
+    "unchanged_proposals_tolerance_1e_12": 237,
+    "proposal_changes_at_most_0_05_tolerance_1e_12": 391,
+    "cell_checks": [
+      {
+        "seed": 0,
+        "mode": "passive",
+        "rounds": 40,
+        "late_window_mean_price": 1.64,
+        "supracompetitive_index": 0.5075987841945284
+      },
+      {
+        "seed": 0,
+        "mode": "revision",
+        "rounds": 40,
+        "late_window_mean_price": 1.725,
+        "supracompetitive_index": 0.7659574468085107
+      },
+      {
+        "seed": 0,
+        "mode": "veto",
+        "rounds": 40,
+        "late_window_mean_price": 1.57565,
+        "supracompetitive_index": 0.3120060790273554
+      },
+      {
+        "seed": 1,
+        "mode": "passive",
+        "rounds": 40,
+        "late_window_mean_price": 1.7754999999999999,
+        "supracompetitive_index": 0.9194528875379934
+      },
+      {
+        "seed": 1,
+        "mode": "revision",
+        "rounds": 55,
+        "late_window_mean_price": 1.51525,
+        "supracompetitive_index": 0.1284194528875377
+      },
+      {
+        "seed": 1,
+        "mode": "veto",
+        "rounds": 45,
+        "late_window_mean_price": 1.5577,
+        "supracompetitive_index": 0.25744680851063834
+      }
+    ]
+  }
+}
