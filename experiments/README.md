@@ -12,18 +12,19 @@ python -m pip install -e '.[gemini,test]'
 
 Never commit an API key or populated `.env` file.
 
-## Official Google transport
+## Run through the official Google API
+
+Obtain your own key through [Google AI Studio](https://aistudio.google.com/apikey) and use the API within Google's [available regions](https://ai.google.dev/gemini-api/docs/available-regions) and [terms](https://ai.google.dev/gemini-api/terms). Live runs consume your API quota and may incur charges. Set the key in your shell; the runner does not automatically load `.env` files.
 
 ```bash
 export GEMINI_API_KEY='your-key'
 python -m pricing_experiment.run_reference_experiment \
-  --transport google \
   --mode passive \
   --seed 0 \
   --output experiments/results/gemini37_passive_seed0
 ```
 
-The runner pins:
+The reference defaults are:
 
 - model `gemini-3.7-flash`;
 - thinking level `high`;
@@ -33,23 +34,11 @@ The runner pins:
 - a fixed regulatory benchmark of 1.473; and
 - convergence checks from round 40 through a maximum of 100 rounds.
 
-Repeat the command for `passive`, `revision`, and `veto`, and use independent seeds.
+Repeat the command for `passive`, `revision`, and `veto`, and use independent seeds. `--model` and `--thinking-level` allow an explicit model selection. Verify that the requested model and thinking level are supported by your Google account. A different model is a new experiment, not an exact reproduction of the recorded cells.
 
-## OpenAI-compatible relay
+The public runner supports only the official Google API. The historical data include a third-party route, recorded in [the provenance table](../docs/reference-experiment.md#7-model-and-api-provenance). Those historical records are retained with their original provenance.
 
-The recorded runs used a YunZhuHub relay after Google capacity limits. The adapter is provider-neutral and requires an HTTPS base URL:
-
-```bash
-export GEMINI_OPENAI_COMPATIBLE_BASE_URL='https://your-relay.example/v1'
-export GEMINI_OPENAI_COMPATIBLE_API_KEY='your-key'
-python -m pricing_experiment.run_reference_experiment \
-  --transport openai-compatible \
-  --mode passive \
-  --seed 0 \
-  --output experiments/results/gemini37_passive_seed0_relay
-```
-
-Do not combine transports within a new run. The completed seed 0 passive cell did switch transport at round 13, so it is retained as descriptive validation rather than a clean replication cell.
+`clients.py` defines the common interface and an offline scripted test client. `gemini_client.py` implements the actual Google call. The experiment runner builds the agents, carries their history and notes forward, and saves each completed round.
 
 ## Outputs
 
@@ -58,7 +47,18 @@ Each run directory contains:
 - `manifest.json`: fixed configuration, progress, and stopping reason;
 - `rounds.jsonl`: proposals, text fields, flags, executed prices, market outcomes, and call metadata.
 
-The repository includes only the sanitized six-cell summary at `results/gemini37-reference-summary.csv`. Raw provider traces and credentials are excluded.
+The published [result files](../results/README.md) contain 520 price records, six cell summaries, two figures, and 20 text examples. Full provider traces and the remaining text records are not included.
+
+## Recreate the figures without API calls
+
+From the repository root:
+
+```bash
+python -m pip install -e '.[plots]'
+python experiments/plot_reference_results.py --output /tmp/gemini37-figures
+```
+
+This reads the published CSV files and checks that their final-window means agree. It writes a six-panel price trajectory plot and an SI comparison. The checked-in PNGs are the original report figures, so the regenerated styling may differ.
 
 ## Offline verification
 
