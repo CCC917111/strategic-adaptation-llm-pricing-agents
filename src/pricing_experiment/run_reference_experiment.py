@@ -18,22 +18,11 @@ from .runner import GameRunner
 
 
 async def run(args: argparse.Namespace) -> None:
-    if args.transport == "google":
-        raw_client = GeminiModelClient(
-            model=args.model,
-            seed=args.seed,
-            thinking_level=args.thinking_level,
-        )
-    else:
-        from pricing_agents.openai_compatible_client import (
-            OpenAICompatibleModelClient,
-        )
-
-        raw_client = OpenAICompatibleModelClient(
-            model=args.model,
-            seed=args.seed,
-            reasoning_effort=args.thinking_level,
-        )
+    raw_client = GeminiModelClient(
+        model=args.model,
+        seed=args.seed,
+        thinking_level=args.thinking_level,
+    )
 
     config = {
         "experiment": "gemini37-stationary-reference",
@@ -41,12 +30,8 @@ async def run(args: argparse.Namespace) -> None:
         "model": args.model,
         "thinking_level": args.thinking_level,
         "temperature": None,
-        "transport": args.transport,
-        "api_method": (
-            "google-genai-generate-content"
-            if args.transport == "google"
-            else "openai-compatible-chat-completions"
-        ),
+        "transport": "google",
+        "api_method": "google-genai-generate-content",
         "provider_side_conversation": False,
         "response_order": "price-justification-disclosure-notes",
         "mode": args.mode,
@@ -136,11 +121,6 @@ def build_parser() -> argparse.ArgumentParser:
         "--thinking-level",
         choices=("low", "medium", "high"),
         default="high",
-    )
-    parser.add_argument(
-        "--transport",
-        choices=("google", "openai-compatible"),
-        default="google",
     )
     parser.add_argument("--rounds", type=int, default=100)
     parser.add_argument("--output", type=Path, required=True)
