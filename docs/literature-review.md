@@ -28,7 +28,7 @@ Luo, Schoepflin, and Wang make the test-time framing explicit. Their meta-game c
 
 [Anto and Vazquez (2026)](../references/references.bib), in *Oversight Is Not Compliance*, add an observability and governance layer. Two LLM sellers return a proposed price, a short justification visible to oversight, a disclosure of whether competitor information influenced the decision, and a private note returned only to the same seller in the next round. A price-only regulator either records a suspicious pattern, requests a lower revision, or caps the proposed price. This separates executed behavior, public accounts, and written private state, while making the private note an editable part of the agent's future context.
 
-That evidence has two limits relevant here. First, the market is stationary, so it does not test whether an established strategy is revised when its environment becomes obsolete. Second, interpreting notes after the fact does not show that the text caused the behavior. Broader work on reasoning faithfulness shows that model explanations can omit causal factors or rationalize outputs after the fact ([Turpin et al., 2023](https://arxiv.org/abs/2305.04388); [Lanham et al., 2023](https://arxiv.org/abs/2307.13702)). Because persistent notes re-enter the next prompt, however, they are not merely explanations; they are an editable component of the agent's external state. Their causal role can be tested by clearing, sanitizing, or transplanting them while other inputs are controlled.
+That evidence has two limits relevant here. First, the market is stationary, so it does not test whether an established strategy is revised when its environment becomes obsolete. Second, interpreting notes after the fact does not show that the text caused the behavior. Broader work on reasoning faithfulness shows that model explanations can omit causal factors or rationalize outputs after the fact ([Turpin et al., 2023](https://arxiv.org/abs/2305.04388); [Lanham et al., 2023](https://arxiv.org/abs/2307.13702)). Because persistent notes re-enter the next prompt, however, they are not merely explanations; they are an editable component of the agent's external state. One possible future design would test their causal role by clearing, sanitizing, or transplanting them while other inputs are controlled; this intervention is under consideration rather than part of the locked design.
 
 ## 4. Demand dynamics are theoretically consequential
 
@@ -51,9 +51,9 @@ Two nearby studies should also be located correctly. Agrawal et al. study multip
 This leaves a specific intersection that existing work has not jointly tested: stationary multi-LLM pricing, Q-learning under observed demand shocks, one LLM facing adaptive bots and preference swaps, and long-horizon single-seller operations each cover only part of the proposed setting. The literature reviewed through 8 September 2026 does not combine:
 
 - several LLM sellers adapting to a continuous demand-regime transition;
-- matched current market conditions reached through different histories;
-- persistent natural-language notes as an experimentally manipulated state variable; and
-- off-path deviation tests that distinguish collusive punishment from inertia.
+- matched current market conditions reached through different histories (a candidate extension here);
+- persistent natural-language notes as an experimentally manipulated state variable (under consideration); and
+- off-path deviation tests that distinguish collusive punishment from inertia (under consideration).
 
 ## 6. Research question and contribution boundary
 
@@ -61,19 +61,19 @@ The literature motivates one central question:
 
 > **How do LLM pricing agents form and revise strategies as market demand evolves continuously, and how do market history and persistent memory affect adaptation and collusive behavior?**
 
-The experiment addresses it through three linked tests:
+The first test defines the current research direction. The remaining two are candidate extensions whose inclusion and implementation remain open:
 
 - **Sequential adaptation:** trace prices, public explanations, and private notes from one round to the next along continuous expansion and contraction paths, using round-specific competitive and joint-profit benchmarks.
-- **Path and memory:** compare matched current market states reached through different demand histories, then retain, clear, sanitize, or transplant notes while holding visible information fixed.
-- **Collusive mechanism:** introduce a unilateral price deviation and test for rival-specific punishment and recovery rather than generic price instability.
+- **Proposed extension — path and memory (under consideration):** compare matched current market states reached through different demand histories, then retain, clear, sanitize, or transplant notes while holding visible information fixed.
+- **Proposed extension — collusive mechanism (under consideration):** introduce a unilateral price deviation and test for rival-specific punishment and recovery rather than generic price instability.
 
-Sequential adaptation provides the trajectory to be explained. The proposed primary contribution comes from identifying path dependence and the causal role of textual memory. The deviation test is required if the paper characterizes the resulting behavior as collusion.
+Sequential adaptation provides the trajectory to be explained. Whether the final contribution also identifies path dependence or a causal role for textual memory depends on which proposed interventions are adopted and what they show. A deviation test would be required if the paper ultimately characterizes elevated prices as a collusive mechanism rather than a supracompetitive outcome.
 
-A smooth expansion curve by itself would remain a parameter sweep. The design becomes a deeper CS/AI contribution only when it separates external environment, visible interaction history, and persistent textual state; branches trajectories at a common checkpoint; uses multiple independent seeds and homogeneous transport; and adds a deviation probe. This turns the market into a controlled testbed for stateful multi-agent adaptation rather than an economics-only comparison of two demand settings.
+A smooth expansion curve by itself would remain largely descriptive. Candidate ways to deepen causal identification include separating the external environment, visible interaction history, and persistent textual state; branching trajectories at a common checkpoint; and adding a deviation probe. These elements are design options, not completed or finalized treatments. Multiple independent seeds and homogeneous transport will be required regardless of which options are selected.
 
 ## 7. Open items
 
-**Contribution statement — TBD.** Final wording depends on whether the matched-path and note interventions produce replicable behavioral differences.
+**Contribution statement — TBD.** Final wording depends on the locked dynamic-market design and the behavioral differences that replicate across runs.
 
 **Limitations — TBD after design lock.** At minimum, the final paper must address model-version drift, stochastic API behavior, transport consistency, prompt sensitivity, limited seeds, the stylized two-firm market, the distinction between written notes and latent model state, and external validity to real pricing systems.
 

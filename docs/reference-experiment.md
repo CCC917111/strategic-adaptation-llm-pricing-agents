@@ -155,9 +155,9 @@ The maximum horizon is 100 rounds. Beginning at round 40, convergence is checked
 | Seeds | 0 and 1 |
 | Modes | passive, revision, veto |
 
-The official implementation uses the Google Gen AI SDK `models.generate_content` endpoint. Gemini 3.7 Flash supports structured output and `low`, `medium`, and `high` thinking levels ([Google model documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.7-flash)). The response schema is passed through `response_mime_type="application/json"` and `response_schema` ([Google Gen AI SDK](https://googleapis.github.io/python-genai/index.html#json-response-schema)).
+The runnable implementation uses the Google Gen AI SDK `models.generate_content` endpoint. The response schema is passed through `response_mime_type="application/json"` and `response_schema` ([Google Gen AI SDK](https://googleapis.github.io/python-genai/index.html#json-response-schema)). The table records the historical request settings. Model availability and supported thinking settings must be checked for a new run.
 
-Capacity limits required a transport change during data collection:
+The historical experiment documentation records the following transport split:
 
 | Cell(s) | Recorded transport |
 |---|---|
@@ -165,9 +165,15 @@ Capacity limits required a transport change during data collection:
 | Seed 0, passive, rounds 13–40 | YunZhuHub OpenAI-compatible relay |
 | Seed 0 revision/veto and all seed 1 cells | YunZhuHub OpenAI-compatible relay |
 
-The relay kept the model ID, high reasoning setting, prompt content, schema order, and unset temperature, but transport equivalence cannot be assumed. The public runner therefore pins one transport for a new run and records it in the manifest. The existing two-seed results are descriptive and are not pooled as if transport were homogeneous.
+The recorded requests retained the model ID, high reasoning setting, prompt content, schema order, and unset temperature. This does not independently verify the relay's upstream model identity or equivalence to Google's API. The public code now supports only the official Google route. Historical provider names remain here and in the result metadata for traceability; there is no relay setup requirement or recommendation.
+
+The released price and text tables were checked against the combined report's CSV and the two detailed JSON summaries. The original per-call manifests and `rounds.jsonl` files were not available in the report bundle used for this release, so the transport split above is report-level provenance. It has not been independently re-audited from API receipts. Source filenames and hashes are recorded in [data-provenance.json](../results/data-provenance.json).
 
 ## 8. Results
+
+![Executed prices for two firms, two seeds, and three oversight modes](../results/figures/price_trajectories_seed0_seed1.png)
+
+Each panel shows a complete recorded run. The solid thick line is the two-firm mean and the thin lines are the individual firms. The vertical dotted line is the warm-up boundary after round 10. Horizontal lines show $p^{NE}=1.473$ and $p^{Mono}=1.802$. Different endpoints reflect the same convergence-based stopping rule, not missing rounds.
 
 | Seed | Mode | Rounds | Final-20 mean price | $SI$ | Flagged agent-rounds | Intervention agent-rounds |
 |---:|---|---:|---:|---:|---:|---:|
@@ -180,9 +186,23 @@ The relay kept the model ID, high reasoning setting, prompt content, schema orde
 
 Five cells reach an exact terminal fixed point under the report's ex-post pattern diagnostic; seed 0 veto does not. Oversight ordering is not stable across the two seeds. In seed 0, revision finishes above passive; in seed 1, it finishes substantially below passive. Veto is lower than passive in both seeds, but two replications with mixed transport are not enough for an effect estimate.
 
-The clearest implementation-level issue is weak exploration after warm-up. Across the 400 within-firm proposal transitions after round 10, 59.3% leave the proposed price exactly unchanged and 97.8% move by at most 0.05. Notes often describe maintaining a price or making a small local test, but no text judge has been run; the repository therefore reports the behavioral inertia and preserves raw text outside the public result table rather than converting keywords into a claim about strategy.
+![Final-window supracompetitive indices by seed and oversight mode](../results/figures/supracompetitive_index_seed0_seed1.png)
 
-These observations motivate a redesigned dynamic experiment. If prices almost never move, a slow response to demand cannot automatically be interpreted as strategic memory or collusion. The next design must create a controlled transition, compare against a stationary branch, and manipulate notes separately from visible history.
+The price records show limited movement after warm-up. Across 400 within-firm transitions ending in rounds 11 onward, 237 proposals are unchanged (59.25%) and 391 move by at most 0.05 (97.75%). The denominator includes the transition from round 10 to round 11. These are descriptive movement counts; they do not establish whether an unchanged price was optimal or why the agent retained it.
+
+### Text examples
+
+The [20-row text table](../results/gemini37-text-examples.csv) contains both firms' final-round records for each run (12 rows) and every revision record (8 rows). This retrospective selection rule covers those events exhaustively and was applied to the existing data; it is not a preregistered sample. Original and final public justifications and private notes are preserved verbatim. At a revision event, the final text is the revised output. At a veto event, the price can be replaced without generating new text.
+
+Three observations are useful for interpreting the recorded behavior:
+
+- **Price persistence:** seed 0 passive, firm 0, round 40 ends its note with “Maintain 1.64.” Seed 1 veto, firm 0, round 45 says to retain 1.5228 unless demand changes. These written plans accompany the observed price plateaus.
+- **Response to oversight:** all eight revision events are included, with their initial and revised text. For example, seed 0 revision, firm 0, round 11 changes its proposal from 1.94 to an executed 1.73 and discusses clearing the benchmark flag. Seed 1 revision, firm 0, round 12 changes from 1.67 to 1.65 and discusses the parallel-movement flag.
+- **Text must be checked against the rules:** seed 1 passive, firm 0, round 40 claims that 1.80 triggers no flags. Yet 1.80 exceeds the fixed threshold $1.18 \times 1.473 = 1.73814$. Passive flags are hidden from the agent, so its statement cannot be used as evidence of actual compliance. Seed 0 veto's last firm-0 note also describes small oscillations in relation to flag rules, but that wording alone does not establish a collusive mechanism.
+
+These examples explain why the notes are worth retaining for inspection. They provide no estimate of strategy prevalence, explanation faithfulness, or a causal effect of memory. No text judge or systematic strategy coding has been applied.
+
+These observations motivate a redesigned dynamic experiment. If prices almost never move, a slow response to demand cannot automatically be interpreted as strategic memory or collusion. The next design will create a controlled transition and compare it with a stationary market. Manipulating notes separately from visible history is a candidate extension that remains under consideration.
 
 ## 9. What this experiment supports
 
@@ -192,4 +212,4 @@ The completed data support three narrow conclusions:
 - Gemini 3.7 Flash can settle above the competitive benchmark in this scaffold; and
 - behavior varies substantially across seeds and exhibits strong local inertia.
 
-They do not establish that oversight has a stable causal effect, that notes caused any price, that the agents adapted to a dynamic market, or that elevated prices were sustained by a reward–punishment strategy. Those claims require the next controlled experiment and a separate unilateral-deviation probe.
+They do not establish that oversight has a stable causal effect, that notes caused any price, that the agents adapted to a dynamic market, or that elevated prices were sustained by a reward–punishment strategy. The dynamic-adaptation claim requires the next controlled experiment. A separate unilateral-deviation probe would be required for a reward–punishment claim, but that probe has not yet been adopted into the design.

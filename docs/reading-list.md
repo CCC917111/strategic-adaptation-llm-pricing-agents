@@ -66,4 +66,4 @@ This list follows the argument of the project. “Role here” distinguishes dir
 2. Calvano (2020), Calvano (2023), Abada–Lambin, and Epivent–Lambin, to establish the mechanism-identification problem.
 3. Rotemberg–Saloner, Haltiwanger–Harrington, Bagwell–Staiger, and Ye, to understand why demand dynamics have ambiguous effects.
 4. Fish's latest revision, Luo, Keppo, Bazaar, and MerchantBench, to locate the current LLM boundary.
-5. *Oversight Is Not Compliance* together with the reasoning-faithfulness papers, to design note interventions without treating notes as ground truth.
+5. *Oversight Is Not Compliance* together with the reasoning-faithfulness papers, to assess whether note interventions should be included without treating notes as ground truth.
