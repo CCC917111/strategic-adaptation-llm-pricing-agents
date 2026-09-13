@@ -22,6 +22,8 @@ results/**/*.jsonl
 results/**/*.parquet
 results/**/*.pkl
 results/**/*.png
+!results/figures/price_trajectories_seed0_seed1.png
+!results/figures/supracompetitive_index_seed0_seed1.png
 results/**/*.pdf
 
 # Keep directory scaffolding
