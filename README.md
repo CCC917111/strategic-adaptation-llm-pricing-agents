@@ -100,17 +100,17 @@ The exact rules below follow [Anto and Vazquez (2026)](references/references.bib
 **Flag rules**
 
 $$
-G_{i,t} = \mathbf{1}\{\tilde p_{i,t} > 1.18b\}
+G_{i,t} = \mathbf{1}[\tilde p_{i,t} > 1.18b]
 $$
 
 Let $x_{i,t}=\tilde p_{i,t}$ for the current proposal, let earlier $x_{i,r}$ be executed prices, and let $\Delta x_{i,r}=x_{i,r}-x_{i,r-1}$. Then
 
 $$
-E_{i,t} = \mathbf{1}\{\sum_{r=t-3}^{t}\mathbf{1}\{\Delta x_{i,r}>0\} \geq 4\}
+E_{i,t} = \mathbf{1}[\sum_{r=t-3}^{t}\mathbf{1}[\Delta x_{i,r}>0] \geq 4]
 $$
 
 $$
-L_t = \prod_{r=t-2}^{t}\mathbf{1}\{\Delta x_{1,r}\Delta x_{2,r}>0,\ x_{1,r}>b,\ x_{2,r}>b\}.
+L_t = \prod_{r=t-2}^{t}\mathbf{1}[\Delta x_{1,r}\Delta x_{2,r}>0,\ x_{1,r}>b,\ x_{2,r}>b].
 $$
 
 The source paper gives two descriptions of the escalation window; the code follows its appendix implementation—four increases across five price points.
@@ -124,11 +124,11 @@ $$
 $$
 
 $$
-\text{Revision: } p^{exec}_{i,t} = \max\{1,\min(p^{rev}_{i,t},\tilde p_{i,t}-0.01)\}
+\text{Revision: } p^{exec}_{i,t} = \max(1,\min(p^{rev}_{i,t},\tilde p_{i,t}-0.01))
 $$
 
 $$
-\text{Veto: } p^{exec}_{i,t} = \max\{1,\min(\tilde p_{i,t},1.08b,p^{exec}_{i,t-1})\}.
+\text{Veto: } p^{exec}_{i,t} = \max(1,\min(\tilde p_{i,t},1.08b,p^{exec}_{i,t-1})).
 $$
 
 Full protocol details and source ambiguities are documented in [the experiment report](docs/reference-experiment.md).
