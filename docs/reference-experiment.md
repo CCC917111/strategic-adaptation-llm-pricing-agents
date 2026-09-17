@@ -1,6 +1,6 @@
-# Gemini 3.7 Flash Reference Experiment
+# Gemini 3.7 Flash Stationary-Market Baseline
 
-This document reports the only completed experiment retained in the public repository. It adapts the stationary two-firm protocol in [Anto and Vazquez (2026)](../references/references.bib), *Oversight Is Not Compliance*, and evaluates Gemini 3.7 Flash under passive, revision, and veto oversight. Dynamic-market treatments are described as current design work, not as completed results.
+This document reports the completed stationary-market baseline for the planned dynamic-market study. It adapts the two-firm protocol in [Anto and Vazquez (2026)](../references/references.bib), *Oversight Is Not Compliance*, and evaluates Gemini 3.7 Flash under passive, revision, and veto oversight. Demand parameters, market size, and marginal cost remain fixed throughout every run. Sellers continue to update their prices and private notes through repeated interaction.
 
 ## 1. Purpose of the reference experiment
 
@@ -8,9 +8,9 @@ The reference experiment serves three purposes:
 
 1. verify the market, prompt, memory, regulator, checkpoint, and stopping pipeline;
 2. establish the behavior of the chosen LLM in the stationary market before demand is changed; and
-3. provide an internal control for the later dynamic-market experiment.
+3. provide an initial reference for later comparisons with changing demand.
 
-It is not an external benchmark against another model or algorithm. Such a comparison is optional for the project's primary causal question. A stationary control is not optional: without it, a post-transition price change cannot be separated from ordinary within-run drift or stochastic path selection.
+The dynamic study will need stationary comparison runs matched to its final model, API route, and observation horizon to distinguish responses to changing demand from ordinary within-run adjustment.
 
 ## 2. Market
 
@@ -149,7 +149,6 @@ The maximum horizon is 100 rounds. Beginning at round 40, convergence is checked
 |---|---|
 | Model ID | `gemini-3.7-flash` |
 | Thinking level | `high` |
-| Temperature | unset |
 | Structured output | strict price/justification/disclosure/notes schema |
 | Provider-side conversation | none; each call is stateless |
 | Seeds | 0 and 1 |
@@ -165,11 +164,13 @@ The historical experiment documentation records the following transport split:
 | Seed 0, passive, rounds 13–40 | YunZhuHub OpenAI-compatible relay |
 | Seed 0 revision/veto and all seed 1 cells | YunZhuHub OpenAI-compatible relay |
 
-The recorded requests retained the model ID, high reasoning setting, prompt content, schema order, and unset temperature. This does not independently verify the relay's upstream model identity or equivalence to Google's API. The public code now supports only the official Google route. Historical provider names remain here and in the result metadata for traceability; there is no relay setup requirement or recommendation.
+The recorded requests retained the model ID, high reasoning setting, prompt content, and schema order. This does not independently verify the relay's upstream model identity or equivalence to Google's API. The public code now supports only the official Google route. Historical provider names remain here and in the result metadata for traceability; there is no relay setup requirement or recommendation.
 
 The released price and text tables were checked against the combined report's CSV and the two detailed JSON summaries. The original per-call manifests and `rounds.jsonl` files were not available in the report bundle used for this release, so the transport split above is report-level provenance. It has not been independently re-audited from API receipts. Source filenames and hashes are recorded in [data-provenance.json](../results/data-provenance.json).
 
 ## 8. Results
+
+These are **stationary-market baseline results**: two seeds across three oversight modes, with no demand expansion, contraction, or external shocks. Quantity and profit vary with the sellers' prices under the same fixed demand function.
 
 ![Executed prices for two firms, two seeds, and three oversight modes](../results/figures/price_trajectories_seed0_seed1.png)
 
