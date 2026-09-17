@@ -1,6 +1,6 @@
 # Run the Gemini 3.7 Flash reference experiment
 
-The repository exposes one experiment: the stationary two-firm reference protocol in `gemini37-reference-design.json`.
+The repository runs the stationary-market baseline specified in `gemini37-reference-design.json`: two sellers interact repeatedly while demand parameters, market size, and marginal cost remain fixed. This establishes their pricing behavior before demand expansion or contraction is introduced.
 
 ## Install
 
@@ -28,7 +28,6 @@ The reference defaults are:
 
 - model `gemini-3.7-flash`;
 - thinking level `high`;
-- no explicit temperature;
 - Google Gen AI `GenerateContent`;
 - paper-order structured JSON;
 - a fixed regulatory benchmark of 1.473; and
