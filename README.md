@@ -26,7 +26,11 @@ The first test defines the current research direction. The other two are candida
 
 The detailed evidence chain and the boundary with recent work are in [the literature review](docs/literature-review.md).
 
-## Reference experiment
+<a id="reference-experiment"></a>
+
+## Stationary-market baseline
+
+The completed experiment establishes a baseline for the dynamic-market study. Two LLM sellers compete repeatedly while demand parameters, market size, and marginal cost remain fixed throughout each run. We compare their prices and recorded notes under passive, revision, and veto oversight.
 
 ### Market
 
@@ -133,13 +137,17 @@ $$
 
 Full protocol details and source ambiguities are documented in [the experiment report](docs/reference-experiment.md).
 
-### Model and API
+<a id="model-and-api"></a>
 
-The reference records use the model identifier `gemini-3.7-flash`, a requested `high` thinking setting, seeds 0 and 1, and no explicit temperature. Each call returns structured JSON, with market history and the previous private note supplied explicitly in the prompt.
+### Model configuration
 
-The runnable code uses the **official Google Gen AI API** with a reader's own `GEMINI_API_KEY`. The historical results include third-party transport, detailed in [API provenance](docs/reference-experiment.md#7-model-and-api-provenance). They provide a stationary reference observation; an all-official run is a new replication, and identical outputs are not guaranteed.
+The reference records use the model identifier `gemini-3.7-flash`, a requested `high` thinking setting, and seeds 0 and 1. Each call returns structured JSON, with market history and the previous private note supplied explicitly in the prompt.
 
-### Completed results
+<a id="completed-results"></a>
+
+### Baseline results: fixed demand
+
+All six runs below use a **stationary market, with no demand expansion, contraction, or external shocks**. Prices, quantities, profits, and notes can still change as the sellers interact. These results establish their behavior under fixed market conditions and provide an initial reference for the planned dynamic experiments.
 
 ![Executed prices for both firms across two seeds and three oversight modes](results/figures/price_trajectories_seed0_seed1.png)
 
