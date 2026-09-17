@@ -1,6 +1,6 @@
-# Reference experiment data
+# Stationary-market baseline data
 
-These files describe the completed stationary experiment with the recorded model identifier `gemini-3.7-flash`, requested high thinking, two seeds, and passive/revision/veto oversight. See [the protocol and results](../docs/reference-experiment.md) for the setting and interpretation.
+These files describe the completed stationary-market baseline with the recorded model identifier `gemini-3.7-flash`, requested high thinking, two seeds, and passive/revision/veto oversight. All six runs keep demand parameters, market size, and marginal cost fixed; they contain no demand expansion, contraction, or external shocks. See [the protocol and results](../docs/reference-experiment.md) for the setting and interpretation.
 
 | File | Contents |
 |---|---|
