@@ -13,6 +13,7 @@ gemini = [
     "google-genai>=2.3.0",
     "pydantic>=2",
 ]
+compatible = ["httpx>=0.27", "pydantic>=2"]
 test = ["pytest>=8"]
 plots = ["matplotlib>=3.8"]
 

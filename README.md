@@ -12,15 +12,15 @@ LLMs extend this line of research because they can interpret natural-language ob
 
 [Anto and Vazquez (2026)](references/references.bib) add an oversight and memory setting in *Oversight Is Not Compliance*. Each seller submits a price, a short explanation visible to the regulator, a disclosure of whether competitor information influenced the decision, and a private note returned only to itself in the next round. Their regulator either records suspicious price patterns, asks the seller to revise, or directly caps the proposed price. This design makes it possible to compare executed behavior with what agents say publicly and remember privately. Its stationary market, however, does not show how an established strategy changes when demand itself evolves, and its analysis of notes does not identify whether those notes caused later choices.
 
-Demand dynamics matter because the profitability of both cooperation and deviation changes over the business cycle ([Rotemberg and Saloner, 1986](https://www.jstor.org/stable/1813358); [Haltiwanger and Harrington, 1991](https://www.jstor.org/stable/2601009); [Bagwell and Staiger, 1997](https://doi.org/10.3386/w5056)). Existing computational studies capture only parts of this problem. Ye studies Q-learning sellers facing observed high and low demand states ([2026 revision](https://arxiv.org/abs/2502.15084)). Bazaar studies one LLM merchant facing three rule-based competitors and staggered customer-preference changes ([Ahmed et al., 2026](https://arxiv.org/abs/2608.00102)). Neither setting follows several LLM sellers as a shared market expands or contracts continuously while their natural-language memory is experimentally controlled.
+Demand dynamics matter because the profitability of both cooperation and deviation changes over the business cycle ([Rotemberg and Saloner, 1986](https://www.jstor.org/stable/1813358); [Haltiwanger and Harrington, 1991](https://www.jstor.org/stable/2601009); [Bagwell and Staiger, 1997](https://doi.org/10.2307/2555941)). Computational studies examine observed high/low demand for Q-learning sellers ([Ye, 2025](https://arxiv.org/abs/2502.15084)), linear and periodic price-sensitivity changes for a single LLM controlling several products in EconEvals ([Fish et al., 2026 revision](https://arxiv.org/abs/2503.18825)), and customer-preference changes for an LLM competing with rule-based merchants in Bazaar ([Ahmed et al., 2026](https://arxiv.org/abs/2608.00102)). Our dynamic model places two LLM sellers in a shared market-size cycle and retains the original three oversight modes, allowing pricing and written strategies to be followed through repeated expansion and contraction.
 
 The central research question is:
 
 > **How do LLM pricing agents form and revise strategies as market demand evolves continuously, and how do market history and persistent memory affect adaptation and collusive behavior?**
 
-The first test defines the current research direction. The other two are candidate extensions and have not yet been locked into the experimental design:
+The first experiment defines the current research direction. The other two remain candidate extensions:
 
-1. **Sequential adaptation:** trace price and strategy changes round by round during gradual expansion and contraction.
+1. **Arm2 — deterministic demand cycle:** trace prices and written strategies through two expansion–contraction cycles under passive, revision, and veto oversight.
 2. **Proposed extension — path and memory (under consideration):** compare the same current market reached through different histories, then clear or replace private notes while holding visible information fixed.
 3. **Proposed extension — collusive mechanism (under consideration):** introduce a unilateral price deviation and test for rival-contingent punishment and recovery.
 
@@ -173,19 +173,29 @@ The six runs finish above the competitive benchmark. Revision finishes above pas
 
 The repository includes [all 520 price records](results/gemini37-price-trajectories.csv), the [six-cell summary](results/gemini37-reference-summary.csv), and [20 text examples](results/gemini37-text-examples.csv). The examples contain both firms' final-round records in all six runs and every revision record. They illustrate written plans and responses to oversight; no strategy coding or causal analysis of notes has been performed. See [the experiment report](docs/reference-experiment.md#8-results) for the small descriptive analysis and [the data guide](results/README.md) for field definitions and provenance.
 
-## Dynamic extension now being designed
+## Arm2: a deterministic market-demand cycle
 
-The continuous demand path is the core extension currently being designed. Two additional identification strategies remain under consideration:
+Arm2 adds gradual expansion and contraction to the market above. Logit shares, product quality, marginal cost, and price bounds stay fixed; a common market-size multiplier changes both firms' quantities and profits:
 
-| Component | Current position |
-|---|---|
-| Continuous market path | Core direction: gradual expansion and contraction, compared with a stationary market |
-| Matched histories and visible evidence | Proposed extension; exact branching and matching procedure is TBD |
-| Persistent-note intervention | Proposed extension; retaining, clearing, sanitizing, or transplanting notes is under consideration |
+$$
+q_{i,t}=\beta_t s_{i,t},\qquad \pi_{i,t}=(p_{i,t}-c)q_{i,t}
+$$
 
-Demand will change continuously rather than jump between a small number of named states, and agents will infer the change from outcomes rather than receive labels such as “growth” or “mature.” Round-by-round changes in price, public explanation, private notes, quantity, and profit will be aligned with round-specific competitive and joint-profit benchmarks. Matched-endpoint branches, note interventions, and a forced one-firm price deviation are possible additions; none has yet been finalized or run.
+$$
+\beta_t=100[1+0.5\sin(2\pi t/40)],\qquad t=0,\ldots,79.
+$$
 
-A smooth demand curve alone would primarily characterize behavior under nonstationarity. Stronger causal claims would require additional controls or interventions that distinguish current demand, observed history, and textual memory. The exact trajectory, model set, replication count, matched-history design, note treatment, deviation probe, contribution statement, and limitations remain **TBD until the design is locked**.
+The first recorded round uses $t=0$. Demand ranges from 50 to 150 over two 40-round cycles. Each oversight mode—passive, revision, and veto—uses five runs of 80 rounds, with the same oversight rules as the stationary experiment. Agents receive transaction history and their own notes; the demand equation, current market size, phase, and future path are not supplied. Runs continue for the full horizon even if prices stabilize.
+
+This choice has three useful properties:
+
+- **Stable price benchmarks.** Market size scales quantities and profits but leaves the static Nash price (1.473) and joint-profit price (1.925) unchanged. The oversight benchmark therefore remains fixed across the cycle.
+- **Comparable points on a cycle.** The same market size occurs during expansion and contraction, providing a way to describe phase-dependent pricing at matched current demand.
+- **Repeated opportunities to adapt.** A smooth, repeated path permits comparisons between the first and second cycles and between behavior near peaks, troughs, and recoveries.
+
+The differentiated-products logit market follows the established algorithmic-pricing literature ([Calvano et al., 2020](https://doi.org/10.1257/aer.20190623)). Deterministic demand cycles and comparisons of rising versus falling demand have a classic precedent in [Haltiwanger and Harrington (1991)](https://doi.org/10.2307/2601009). The sinusoidal path is our controlled implementation of that idea; EconEvals provides a related LLM precedent for periodic demand changes, through price sensitivity rather than common market size ([Fish et al., 2026 revision](https://arxiv.org/abs/2503.18825)).
+
+The experiment asks how pricing strategies develop under these conditions. Holding a price can be consistent with unchanged static incentives; a difference between rising and falling phases also reflects different histories and notes. Controlled memory interventions and deviation tests remain **under consideration**. See [the Arm2 design](docs/arm2-cycle.md) for parameters, literature connections, and the comparison with the stationary reference.
 
 ## Reproduce the reference experiment
 

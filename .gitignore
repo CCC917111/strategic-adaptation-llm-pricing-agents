@@ -17,6 +17,7 @@ __pycache__/
 .vscode/
 
 # Generated experiment artifacts
+experiments/results/
 results/raw/
 results/**/*.jsonl
 results/**/*.parquet
