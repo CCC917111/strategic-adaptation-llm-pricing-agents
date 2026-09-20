@@ -34,10 +34,10 @@ This list follows the argument of the project. “Role here” distinguishes dir
 |---|---|---|
 | [Rotemberg and Saloner (1986), *A Supergame-Theoretic Model of Price Wars during Booms*](https://www.jstor.org/stable/1813358) | With observed i.i.d. demand shocks, stronger deviation incentives in booms can force lower collusive prices | Theory for shock-dependent incentive constraints |
 | [Haltiwanger and Harrington (1991), *The Impact of Cyclical Demand Movements on Collusive Behavior*](https://www.jstor.org/stable/2601009) | Predictable future demand changes the continuation value; collusion is hardest during falling demand | Direct reason to compare equal current demand reached through different phases |
-| [Bagwell and Staiger (1997), *Collusion over the Business Cycle*](https://doi.org/10.3386/w5056) | Price cyclicality depends on persistence and expected phase duration | Shows that “growth versus maturity” has no universal sign |
+| [Bagwell and Staiger (1997), *Collusion over the Business Cycle*](https://doi.org/10.2307/2555941) | Price cyclicality depends on persistence and expected phase duration | Shows that “growth versus maturity” has no universal sign |
 | [Hamilton (1989), *A New Approach to the Economic Analysis of Nonstationary Time Series and the Business Cycle*](https://doi.org/10.2307/1912559) | Represents unobserved regime changes with a discrete-state Markov process | Vocabulary and possible generator for latent regimes; not collusion evidence |
 | [Berry, Levinsohn, and Pakes (1995), *Automobile Prices in Market Equilibrium*](https://doi.org/10.2307/2171802) | Structural demand and supply estimation for differentiated products | Demand-model lineage; not a dynamic-collusion paper |
-| [Ye (2026 rev.), *Algorithmic Collusion under Observed Demand Shocks*](https://arxiv.org/abs/2502.15084) | Q-learning learns procyclical, countercyclical, or rigid prices; numerical demand and price memory matter | Closest RL comparison and boundary on novelty |
+| [Ye (2025), *Algorithmic Collusion under Observed Demand Shocks*](https://arxiv.org/abs/2502.15084) | Q-learning learns demand-contingent prices under publicly observed i.i.d. high/low demand; demand and price memory matter | RL comparison; distinct from deterministic market-size cycles |
 
 ## 4. LLM pricing and test-time adaptation
 
@@ -46,15 +46,17 @@ This list follows the argument of the project. “Role here” distinguishes dir
 | [Fish, Gonczarowski, and Shorrer (2026 rev.), *Algorithmic Collusion by Large Language Models*](https://arxiv.org/abs/2404.00806) | Rapid supracompetitive pricing, prompt sensitivity, off-path tests, and causal reasoning implantation | Main LLM-pricing foundation and boundary on memory novelty |
 | [Luo, Schoepflin, and Wang (2026), *Algorithmic Collusion at Test Time*](https://arxiv.org/abs/2602.17203) | Models deployment as a pretrained policy plus finite in-game adaptation | Direct test-time framing |
 | [Keppo et al. (2026), *On the Fragility of AI Agent Collusion*](https://arxiv.org/abs/2603.20281) | Patience, information access, agent count, and algorithm heterogeneity can reduce coordination | Shows that behavior is agent × scaffold × environment dependent |
-| [Ahmed et al. (2026), *Can LLM Agents Price Competitively?*](https://arxiv.org/abs/2608.00102) | Dynamic auction with hidden preference shifts, adaptive bots, textual beliefs, exact regret, and shock-recovery measures | Closest dynamic LLM pricing study; closes the broad gap |
+| [Ahmed et al. (2026), *Can LLM Agents Price Competitively?*](https://arxiv.org/abs/2608.00102) | Dynamic auction with hidden preference shifts, adaptive bots, textual beliefs, exact regret, and shock-recovery measures | One LLM facing adaptive bots, rather than multiple LLM sellers sharing a demand cycle |
 | [Shi et al. (2026), *MerchantBench*](https://arxiv.org/abs/2607.28956) | Long-horizon seller operations reveal large coherence and adaptation gaps relative to humans | Supports the long-horizon state-management problem |
-| [Fish et al. (2025), *EconEvals*](https://arxiv.org/abs/2503.18825) | Evaluates multi-turn LLM agents in unknown economic environments | Evaluation methodology |
+| [Fish et al. (2026 rev.), *EconEvals: Benchmarks and Litmus Tests for Economic Decision-Making by LLM Agents*](https://arxiv.org/abs/2503.18825) | Single-agent multi-product pricing with linear or sinusoidal price-sensitivity changes; relates notes to adaptation | Direct periodic-pricing precedent; Arm2 instead varies shared market size between two LLM sellers |
 
 ## 5. Oversight, explanations, and memory
 
 | Work | What it establishes | Role here |
 |---|---|---|
 | Anto and Vazquez (2026), *Oversight Is Not Compliance* | Separates executed price, public justification, competitor-use disclosure, and persistent private notes under passive/revision/veto oversight | Experimental scaffold; local source manuscript |
+| [Lee and Park (2026a), *Faithful yet Collusive*](https://arxiv.org/abs/2609.18346) | Compares stated and behaviorally inferred relationships; faithfulness scores do not consistently track supracompetitive pricing | Pricing-specific reason to evaluate text alongside actions |
+| [Lee and Park (2026b), *Market Signal Injection*](https://arxiv.org/abs/2609.18357) | Formatting and market commentary can change prices while underlying numerical information is held fixed | Supports consistent observation formats; not a demand-cycle experiment |
 | [Turpin et al. (2023), *Language Models Don't Always Say What They Think*](https://arxiv.org/abs/2305.04388) | Explanations can omit causally relevant features | Reasoning-faithfulness caution |
 | [Lanham et al. (2023), *Measuring Faithfulness in Chain-of-Thought Reasoning*](https://arxiv.org/abs/2307.13702) | Explanation faithfulness varies by task and model | Measurement caution |
 | [Shinn et al. (2023), *Reflexion*](https://arxiv.org/abs/2303.11366) | Stored verbal reflection can change later behavior | Explicit textual-memory precedent |
@@ -65,5 +67,5 @@ This list follows the argument of the project. “Role here” distinguishes dir
 1. OECD (2025), the RealPage settlement, and the EU Horizontal Guidelines, to separate deployed pricing risks from autonomous-collusion hypotheses.
 2. Calvano (2020), Calvano (2023), Abada–Lambin, and Epivent–Lambin, to establish the mechanism-identification problem.
 3. Rotemberg–Saloner, Haltiwanger–Harrington, Bagwell–Staiger, and Ye, to understand why demand dynamics have ambiguous effects.
-4. Fish's latest revision, Luo, Keppo, Bazaar, and MerchantBench, to locate the current LLM boundary.
+4. Fish's latest collusion revision, EconEvals, Luo, Keppo, Bazaar, and MerchantBench, to locate the current LLM boundary.
 5. *Oversight Is Not Compliance* together with the reasoning-faithfulness papers, to assess whether note interventions should be included without treating notes as ground truth.
