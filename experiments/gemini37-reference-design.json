@@ -7,7 +7,6 @@
   },
   "model": "gemini-3.7-flash",
   "thinking_level": "high",
-  "temperature": null,
   "response_order": [
     "price",
     "justification",
@@ -15,7 +14,7 @@
     "notes"
   ],
   "provider_side_conversation": false,
-  "seeds": [0, 1],
+  "seeds": [0, 1, 2, 3, 4],
   "oversight_modes": ["passive", "revision", "veto"],
   "market": {
     "type": "stationary differentiated-products Bertrand duopoly",
@@ -52,7 +51,7 @@
     "seed0_passive_rounds_1_12": "official Google Gen AI GenerateContent",
     "seed0_passive_rounds_13_40": "YunZhuHub OpenAI-compatible relay",
     "all_other_cells": "YunZhuHub OpenAI-compatible relay",
-    "interpretation": "Transport is a provenance difference, not a treatment. The two seeds are descriptive and are not pooled."
+    "interpretation": "Transport is a provenance difference, not a treatment. Five historical runs per mode are summarized descriptively across batches."
   },
   "source_ambiguities": [
     "The source methods call the benchmark a round-specific best response, while the threshold calibration and appendix prompt imply fixed pNE=1.473.",

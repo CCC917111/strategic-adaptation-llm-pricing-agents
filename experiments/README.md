@@ -33,7 +33,7 @@ The reference defaults are:
 - a fixed regulatory benchmark of 1.473; and
 - convergence checks from round 40 through a maximum of 100 rounds.
 
-Repeat the command for `passive`, `revision`, and `veto`, and use independent seeds. `--model` and `--thinking-level` allow an explicit model selection. Verify that the requested model and thinking level are supported by your Google account. A different model is a new experiment, not an exact reproduction of the recorded cells.
+Repeat the command for run identifiers 0–4 in each of `passive`, `revision`, and `veto`, using fifteen distinct output directories. `--model` and `--thinking-level` allow an explicit model selection. Verify that the requested model and thinking level are supported by your Google account. A different model is a new experiment, not an exact reproduction of the recorded cells.
 
 The stationary reference runner uses the official Google API. The historical data include a third-party route, recorded in [the provenance table](../docs/reference-experiment.md#7-model-and-api-provenance). Those historical records are retained with their original provenance.
 
@@ -46,7 +46,7 @@ Each run directory contains:
 - `manifest.json`: fixed configuration, progress, and stopping reason;
 - `rounds.jsonl`: proposals, text fields, flags, executed prices, market outcomes, and call metadata.
 
-The published [result files](../results/README.md) contain 520 price records, six cell summaries, two figures, and 20 text examples. Full provider traces and the remaining text records are not included.
+The published [five-run result files](../results/stationary-five-run/) contain all 1,330 firm-round records, fifteen cell summaries, five-round aggregates, and two figures. The original two-run files and their twenty text examples remain available as historical subsets. Full provider traces are not included.
 
 ## Arm2: deterministic demand cycles
 
@@ -69,7 +69,7 @@ python -m pricing_experiment.run_cycle_oversight \
 
 This launches 15 independent markets, with at most six simultaneous model requests. Each market progresses sequentially through its rounds; the two firms make initial proposals concurrently from the same completed history. Revision calls occur only when the original regulator requires them. The default delay between rounds is 15 seconds. No convergence-based early stopping is used.
 
-Use a new output directory for a new experiment. To resume an interrupted suite, repeat the same command with `--resume`. Completed cells are skipped; saved settings and source hashes must match. To run only missing oversight modes in a separate directory, select `--modes revision veto`. The older `run_cycle_experiment` entry point is retained for the initial passive batch; the multi-mode runner is the entry point for the complete design.
+Use a new output directory for a new experiment. To resume an interrupted suite, repeat the same command with `--resume`. Completed cells are skipped; saved settings and source hashes must match. Select `--modes passive` for a passive-only suite or `--modes revision veto` for those two modes. `run_cycle_oversight` is the single Arm2 entry point. Historical passive archives retain their original `seedN/` layout; the current runner writes `seedN/mode/`. Resume an old archive with its archived source snapshot, since source/configuration checks deliberately reject changed code.
 
 The directory contains `suite.json`, `market-path.csv`, a source snapshot under `code/src`, and a subdirectory for every `seedN/mode`. Each cell saves its configuration and progress in `manifest.json`, complete market rounds in `rounds.jsonl`, and request/response evidence in `api-receipts.jsonl`. API keys and authorization headers are excluded. These raw logs include full experimental prompts and generated text and should be reviewed before public release.
 
@@ -81,10 +81,10 @@ From the repository root:
 
 ```bash
 python -m pip install -e '.[plots]'
-python experiments/plot_reference_results.py --output /tmp/gemini37-figures
+python experiments/plot_stationary_results.py --output /tmp/gemini37-figures
 ```
 
-This reads the published CSV files and checks that their final-window means agree. It writes a six-panel price trajectory plot and an SI comparison. The checked-in PNGs are the original report figures, so the regenerated styling may differ.
+This checks all fifteen trajectories and final-window metrics against the public CSVs. It writes a five-by-three individual trajectory figure and a one-by-three aggregate with a trailing five-round mean and sample SD across five runs. The older `plot_reference_results.py` reproduces the archived two-run release only.
 
 For the published Arm2 passive data, run:
 
