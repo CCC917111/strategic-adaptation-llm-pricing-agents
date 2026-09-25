@@ -15,7 +15,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from pricing_agents import PricingDecision
-from pricing_experiment import run_cycle_experiment as entry
+from pricing_experiment import run_cycle_oversight as entry
 from pricing_experiment.persistence import ExperimentStore, round_to_dict
 from pricing_market import LogitMarket
 from pricing_market.cycle import CycleConfig, CyclicLogitMarket
@@ -57,7 +57,8 @@ def arguments(output, *, resume=False):
     return argparse.Namespace(
         output=Path(output), resume=resume, model="offline-test-model",
         thinking_level="high", temperature=1.2, round_delay=0,
-        endpoint_host="example.invalid", source_sha256={"offline-fixture": "test"},
+        endpoint="https://example.invalid/v1", no_receipts=False,
+        source_sha256={"offline-fixture": "test"},
     )
 
 
@@ -149,7 +150,7 @@ class CycleRunnerTests(unittest.TestCase):
 
     def test_full_80_round_run_preserves_private_memory_and_hides_cycle(self):
         client = RecordingClient()
-        runner = entry.make_runner(client, seed=0)
+        runner = entry.make_runner(client, seed=0, mode="passive")
         rows = asyncio.run(runner.run(80))
         self.assertEqual(len(rows), 80)
         self.assertEqual(len(client.calls), 160)
@@ -174,15 +175,15 @@ class CycleRunnerTests(unittest.TestCase):
 
     def test_persisted_resume_matches_uninterrupted_rounds_and_private_notes(self):
         async def scenario(directory):
-            uninterrupted = entry.make_runner(RecordingClient(), 3)
+            uninterrupted = entry.make_runner(RecordingClient(), 3, "passive")
             await uninterrupted.run(80)
-            first = entry.make_runner(RecordingClient(), 3)
+            first = entry.make_runner(RecordingClient(), 3, "passive")
             store = ExperimentStore(directory)
             store.initialize({"offline": True}, resume=False)
             for _ in range(17):
                 store.append_round(await first.run_round())
             resumed_client = RecordingClient()
-            resumed = entry.make_runner(resumed_client, 3)
+            resumed = entry.make_runner(resumed_client, 3, "passive")
             resumed.restore(store.load_rounds())
             await resumed.run(63)
             return uninterrupted, resumed, resumed_client
@@ -199,34 +200,34 @@ class CycleRunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, fake_api_module():
             args = arguments(directory)
             with contextlib.redirect_stdout(io.StringIO()):
-                result = asyncio.run(entry.run_cell(args, 2, asyncio.Semaphore(6)))
-            self.assertEqual(result, {"seed": 2, "status": "completed", "rounds": 80})
+                result = asyncio.run(entry.run_cell(args, 2, "passive", asyncio.Semaphore(6)))
+            self.assertEqual(result, {"seed": 2, "mode": "passive", "status": "completed", "rounds": 80})
             client = RecordingClient.instances[0]
             self.assertEqual(len(client.calls), 160)
             self.assertTrue(client.closed)
             self.assertEqual(client.settings["seed"], 2)
             self.assertEqual(client.settings["temperature"], 1.2)
-            store = ExperimentStore(Path(directory) / "seed2")
+            store = ExperimentStore(Path(directory) / "seed2" / "passive")
             manifest = json.loads(store.manifest_path.read_text())
             self.assertFalse(manifest["config"]["early_stopping"])
             self.assertEqual(manifest["stopping"], {"reason": "fixed_horizon", "round": 80})
             args.resume = True
-            repeated = asyncio.run(entry.run_cell(args, 2, asyncio.Semaphore(6)))
+            repeated = asyncio.run(entry.run_cell(args, 2, "passive", asyncio.Semaphore(6)))
             self.assertEqual(repeated, result)
             self.assertEqual(len(RecordingClient.instances), 1)
             args.temperature = 1.0
             with self.assertRaisesRegex(ValueError, "configuration differs"):
-                asyncio.run(entry.run_cell(args, 2, asyncio.Semaphore(6)))
+                asyncio.run(entry.run_cell(args, 2, "passive", asyncio.Semaphore(6)))
 
     def test_live_entry_point_partial_resume_uses_next_round_without_replay(self):
         async def scenario(directory):
             args = arguments(directory, resume=True)
-            store = ExperimentStore(Path(directory) / "seed4")
-            store.initialize(entry.cell_config(args, 4), resume=False)
-            first = entry.make_runner(RecordingClient(), 4)
+            store = ExperimentStore(Path(directory) / "seed4" / "passive")
+            store.initialize(entry.cell_config(args, 4, "passive"), resume=False)
+            first = entry.make_runner(RecordingClient(), 4, "passive")
             for _ in range(40):
                 store.append_round(await first.run_round())
-            result = await entry.run_cell(args, 4, asyncio.Semaphore(6))
+            result = await entry.run_cell(args, 4, "passive", asyncio.Semaphore(6))
             return result, store.load_rounds()
 
         with tempfile.TemporaryDirectory() as directory, fake_api_module():
