@@ -39,7 +39,6 @@ class LogitMarket:
         for price in prices:
             self._validate_price(price)
 
-        del round_index
         utilities = [
             (self.config.quality - price) / self.config.temperature
             for price in prices
@@ -49,7 +48,7 @@ class LogitMarket:
         outside_weight = exp(-normalization)
         denominator = outside_weight + sum(product_weights)
         shares = [weight / denominator for weight in product_weights]
-        market_size = self.config.market_size
+        market_size = self.market_size_at(round_index)
         firms = tuple(
             FirmOutcome(
                 price=price,
@@ -65,6 +64,10 @@ class LogitMarket:
             market_size=market_size,
         )
 
+    def market_size_at(self, round_index: int | None = None) -> float:
+        """Stationary size; dynamic markets override this settlement input."""
+        return self.config.market_size
+
     def best_response(
         self,
         rival_price: float,
@@ -76,7 +79,7 @@ class LogitMarket:
 
         def objective(own_price: float) -> float:
             return self.evaluate(
-                (own_price, rival_price)
+                (own_price, rival_price), round_index=round_index
             ).firms[0].profit
 
         return self._golden_section_maximize(objective, tolerance=tolerance)
