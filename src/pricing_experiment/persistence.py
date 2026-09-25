@@ -17,6 +17,13 @@ from .runner import ExperimentRound
 SCHEMA_VERSION = 1
 
 
+def write_json(path: Path, value: dict) -> None:
+    """Atomically replace a JSON manifest after the complete write succeeds."""
+    temporary = path.with_suffix(path.suffix + ".tmp")
+    temporary.write_text(json.dumps(value, indent=2, ensure_ascii=False) + "\n")
+    os.replace(temporary, path)
+
+
 def utc_now() -> str:
     return datetime.now(UTC).isoformat()
 

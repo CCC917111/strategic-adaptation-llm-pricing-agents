@@ -1,8 +1,8 @@
 """Fixed-horizon Arm2 cycles under the three unchanged oversight modes.
 
-Each requested mode runs five replicates. The passive-only historical entry
-point remains in run_cycle_experiment.py. This entry point writes each cell to
-seedN/MODE and never imports or overwrites historical passive-only records.
+Each requested mode runs five replicates. Use --modes passive for a passive-only
+suite. This entry point writes each cell to seedN/MODE and never imports or
+overwrites historical passive-only records.
 """
 
 from __future__ import annotations
@@ -25,8 +25,7 @@ from pricing_agents.cycle_prompts import CyclePromptFactory
 from pricing_market.cycle import CycleConfig, CyclicLogitMarket
 from pricing_regulator import OversightMode, Regulator
 
-from .persistence import ExperimentStore, utc_now
-from .run_cycle_experiment import write_json
+from .persistence import ExperimentStore, utc_now, write_json
 from .runner import GameRunner
 
 
