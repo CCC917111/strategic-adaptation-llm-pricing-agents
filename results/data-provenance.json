@@ -45,7 +45,7 @@
     }
   ],
   "source_scope": "Combined report CSV and two report summaries; original per-call manifests and rounds.jsonl were not available in this bundle.",
-  "api_provenance": "Transport split is taken from the historical experiment documentation; upstream relay identity and equivalence have not been independently verified.",
+  "api_provenance": "Interface labels are taken from the historical experiment documentation and use generic names; upstream model identity has not been independently verified.",
   "text_selection": {
     "rule": "Both firms at the final recorded round of each run, plus every record with nonempty revision_private_notes.",
     "timing": "Retrospective deterministic selection, not preregistered.",

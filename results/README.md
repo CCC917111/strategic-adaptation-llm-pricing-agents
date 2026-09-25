@@ -25,7 +25,7 @@ python experiments/plot_stationary_results.py --output /tmp/stationary-five-run
 
 ## Original two-run archive
 
-The following files are retained unchanged from the earlier release and cover only runs 0 and 1. Its twenty text examples are not a five-run text sample.
+The following files cover only runs 0 and 1. Numerical values and model-generated text are retained from the earlier release; API labels use generic interface names. Its twenty text examples are not a five-run text sample.
 
 | File | Contents |
 |---|---|
@@ -48,7 +48,7 @@ The selection is retrospective: both firms' last records in all six runs plus ev
 
 The 520 records represent 260 market rounds across six runs, with 40/40/40 rounds for seed 0 and 40/55/45 for seed 1 (passive/revision/veto). The price table includes every round present in the combined report. Its six final-20 mean prices and SI values reconcile with the published summary.
 
-The report bundle contains the combined text/price CSV, two detailed summary JSON files, and the figures. Original `rounds.jsonl` and per-call manifests were not part of the bundle used here. API transport is therefore disclosed from the historical documentation, not newly verified from provider receipts. The relay's upstream identity and equivalence to direct Google calls remain unverified. The stationary reproduction command uses the official Google API; the separate Arm2 experiment records its route in [the dynamic-market design](../docs/arm2-cycle.md).
+The original two-run release was built from a report bundle containing the combined text/price CSV, two detailed summary JSON files, and the figures. The expanded five-run release was subsequently checked against the original round logs and completion manifests. Historical API labels describe the recorded interface; they are not an independent verification of the upstream model.
 
 Full prompt/provider traces, credentials, and the remaining 500 text records are excluded from this release. The source hashes allow later comparison with the retained report files; hashes alone do not establish API provenance. `private notes` refers to what the rival and regulator could observe during the simulation, not a claim that these published records are confidential personal data.
 
