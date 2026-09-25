@@ -1,0 +1,38 @@
+{
+  "experiment": "Arm2 deterministic market-size cycle",
+  "modes": ["passive", "revision", "veto"],
+  "run_ids": [0, 1, 2, 3, 4],
+  "firms": 2,
+  "rounds": 80,
+  "early_stopping": false,
+  "market": {
+    "demand": "quantity_i = market_size * differentiated_logit_share_i",
+    "market_size": "100 * (1 + 0.5 * sin(2 * pi * (round - 1) / 40))",
+    "mean_market_size": 100,
+    "relative_amplitude": 0.5,
+    "period_rounds": 40,
+    "quality": 2,
+    "logit_scale": 0.25,
+    "outside_utility": 0,
+    "marginal_cost": 1,
+    "price_bounds": [1, 3]
+  },
+  "information": {
+    "condition": "INFER",
+    "visible": ["both firms' past executed prices", "own past sales and profits", "own previous private notes", "original mode-specific oversight feedback"],
+    "hidden": ["current market size", "demand formula", "cycle phase", "future demand path", "rival notes and profits"]
+  },
+  "oversight": {
+    "protocol": "unchanged stationary reference rules",
+    "warmup_rounds": 10,
+    "benchmark": 1.473
+  },
+  "requested_api_settings": {
+    "model": "gemini-3.7-flash",
+    "reasoning_effort": "high",
+    "temperature": 1.2,
+    "seed": "run_id"
+  },
+  "entry_point": "pricing_experiment.run_cycle_oversight",
+  "additional_controls": "Not included in the basic three-mode experiment; see docs/arm2-cycle.md"
+}
