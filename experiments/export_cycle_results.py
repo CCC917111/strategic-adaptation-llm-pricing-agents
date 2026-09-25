@@ -113,7 +113,7 @@ def export(root: Path, output: Path):
     write_csv(output / "text-examples.csv", texts)
     provenance = {"experiment": suite["experiment"], "started_at": suite["started_at"],
                   "finished_at": suite["finished_at"], "records": len(prices),
-                  "transport": "YunZhuHub OpenAI-compatible chat completions",
+                  "transport": "OpenAI-compatible chat completions",
                   "model_requested": "gemini-3.7-flash", "temperature_requested": 1.2,
                   "thinking_requested": "high", "seed_identifiers_requested": list(range(5)),
                   "source_sha256": suite["config_example"]["source_sha256"],

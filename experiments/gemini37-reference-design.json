@@ -49,8 +49,8 @@
   },
   "recorded_transport": {
     "seed0_passive_rounds_1_12": "official Google Gen AI GenerateContent",
-    "seed0_passive_rounds_13_40": "YunZhuHub OpenAI-compatible relay",
-    "all_other_cells": "YunZhuHub OpenAI-compatible relay",
+    "seed0_passive_rounds_13_40": "OpenAI-compatible API",
+    "all_other_cells": "OpenAI-compatible API",
     "interpretation": "Transport is a provenance difference, not a treatment. Five historical runs per mode are summarized descriptively across batches."
   },
   "source_ambiguities": [

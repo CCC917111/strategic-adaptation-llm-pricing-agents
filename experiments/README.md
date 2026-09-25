@@ -35,7 +35,7 @@ The reference defaults are:
 
 Repeat the command for run identifiers 0–4 in each of `passive`, `revision`, and `veto`, using fifteen distinct output directories. `--model` and `--thinking-level` allow an explicit model selection. Verify that the requested model and thinking level are supported by your Google account. A different model is a new experiment, not an exact reproduction of the recorded cells.
 
-The stationary reference runner uses the official Google API. The historical data include a third-party route, recorded in [the provenance table](../docs/reference-experiment.md#7-model-and-api-provenance). Those historical records are retained with their original provenance.
+The stationary reference runner uses the Google API. Historical request metadata are summarized in [the experiment report](../docs/reference-experiment.md#7-model-and-api-provenance).
 
 `clients.py` defines the common interface and an offline scripted test client. `gemini_client.py` implements the actual Google call. The experiment runner builds the agents, carries their history and notes forward, and saves each completed round.
 
