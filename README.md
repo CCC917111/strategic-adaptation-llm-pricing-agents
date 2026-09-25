@@ -141,17 +141,17 @@ Full protocol details and source ambiguities are documented in [the experiment r
 
 ### Model configuration
 
-The reference records use the model identifier `gemini-3.7-flash`, a requested `high` thinking setting, and seeds 0 and 1. Each call returns structured JSON, with market history and the previous private note supplied explicitly in the prompt.
+The reference records use the model identifier `gemini-3.7-flash`, a requested `high` thinking setting, and five run identifiers (0–4) per oversight mode. Each call returns structured JSON, with market history and the previous private note supplied explicitly in the prompt.
 
 <a id="completed-results"></a>
 
 ### Baseline results: fixed demand
 
-All six runs below use a **stationary market, with no demand expansion, contraction, or external shocks**. Prices, quantities, profits, and notes can still change as the sellers interact. These results establish their behavior under fixed market conditions and provide an initial reference for the planned dynamic experiments.
+The baseline contains **five runs per oversight mode, fifteen runs in total, under fixed demand**. Market size, demand parameters, and marginal cost stay constant. Prices, quantities, profits, and notes can change as sellers interact. The demand and oversight rules are unchanged from the initial two-run release.
 
-![Executed prices for both firms across two seeds and three oversight modes](results/figures/price_trajectories_seed0_seed1.png)
+![Five-run mean and sample standard deviation in the stationary market](results/stationary-five-run/five-run-aggregate.png)
 
-Each row is one seed and each column one oversight mode. Thin lines show individual firms; the thick line is their mean. The vertical dotted line marks the end of warm-up. Horizontal lines mark the competitive price (1.473) and the single-product monopoly reference (1.802). Runs end at different rounds under the same stopping rule.
+Each panel shows one oversight mode. Prices are averaged across the two firms, smoothed over the trailing five rounds within each run, then averaged across five runs. Dashed and dotted curves show mean minus/plus one sample SD. All runs share rounds 1–40; the aggregate uses that common interval without extending stopped runs. The vertical line marks the end of warm-up; horizontal lines mark 1.473 and 1.802. [Individual trajectories](results/stationary-five-run/individual-trajectories.png) retain each run's full 40–55 rounds.
 
 The table reports mean executed price over the final 20 rounds.
 
@@ -159,19 +159,15 @@ The table reports mean executed price over the final 20 rounds.
 |---:|---:|---:|---:|
 | 0 | 1.6400 | 1.7250 | 1.5757 |
 | 1 | 1.7755 | 1.5153 | 1.5577 |
+| 2 | 1.4925 | 1.6900 | 1.5610 |
+| 3 | 1.4800 | 1.5510 | 1.4933 |
+| 4 | 1.6600 | 1.4900 | 1.7200 |
 
-| Seed | Mode | Rounds | $SI$ | Flagged agent-rounds | Intervention agent-rounds |
-|---:|---|---:|---:|---:|---:|
-| 0 | Passive | 40 | 0.508 | 4 | 0 |
-| 0 | Revision | 40 | 0.766 | 2 | 2 |
-| 0 | Veto | 40 | 0.312 | 4 | 4 |
-| 1 | Passive | 40 | 0.919 | 60 | 0 |
-| 1 | Revision | 55 | 0.128 | 6 | 6 |
-| 1 | Veto | 45 | 0.257 | 3 | 3 |
+Across these five historical runs, final-20 mean prices average 1.6096 (passive), 1.5943 (revision), and 1.5815 (veto). The ordering varies between runs. In particular, several revision/veto runs receive no intervention after warm-up, so assignment to an oversight mode does not imply that it actively changed prices. All fifteen final-window means exceed 1.473, with some close to that benchmark.
 
-The six runs finish above the competitive benchmark. Revision finishes above passive in seed 0 and below it in seed 1, so these two seeds do not establish a stable ordering of oversight modes. Of 400 within-firm proposal changes with destination rounds 11 onward, 237 are unchanged (59.25%) and 391 are at most 0.05 in magnitude (97.75%). This price persistence motivates examining how the agents respond when demand changes.
+Across 1,030 within-firm proposal changes ending in rounds 11 onward, 636 are unchanged (61.75%) and 1,015 are at most 0.05 in magnitude (98.54%). These descriptive results motivate examining price persistence through changing demand; they do not identify a collusive mechanism or a causal oversight effect.
 
-The repository includes [all 520 price records](results/gemini37-price-trajectories.csv), the [six-cell summary](results/gemini37-reference-summary.csv), and [20 text examples](results/gemini37-text-examples.csv). The examples contain both firms' final-round records in all six runs and every revision record. They illustrate written plans and responses to oversight; no strategy coding or causal analysis of notes has been performed. See [the experiment report](docs/reference-experiment.md#8-results) for the small descriptive analysis and [the data guide](results/README.md) for field definitions and provenance.
+The release includes [all 1,330 firm-round records](results/stationary-five-run/price-trajectories.csv), the [fifteen-run summary](results/stationary-five-run/run-summary.csv), and [five-round aggregates](results/stationary-five-run/five-round-aggregate.csv). The original [20 text examples](results/gemini37-text-examples.csv) remain a documented subset from runs 0 and 1. See [the experiment report](docs/reference-experiment.md#8-results) and [data guide](results/README.md).
 
 ## Arm2: a deterministic market-demand cycle
 
@@ -217,7 +213,7 @@ python -m pricing_experiment.run_reference_experiment \
   --output experiments/results/gemini37_passive_seed0
 ```
 
-Repeat for `passive`, `revision`, and `veto`. The default model identifier is the one recorded in the reference experiment; use `--model` to select a model available to your Google account and record it as a new run. See [experiments/README.md](experiments/README.md) for API setup, saved outputs, the stopping rule, and offline plot reproduction.
+Repeat for seeds 0–4 in each of `passive`, `revision`, and `veto`, with a separate output directory for every cell. The default model identifier is the one recorded in the reference experiment; use `--model` to select a model available to your Google account and record it as a new run. See [experiments/README.md](experiments/README.md) for API setup, the unified Arm2 entry point, saved outputs, stopping rules, and offline plot reproduction.
 
 Run offline checks:
 
@@ -233,7 +229,7 @@ python -m pytest -q
 | `src/pricing_agents/` | Prompts, structured model clients, and persistent notes |
 | `src/pricing_regulator/` | Price flags and passive/revision/veto execution |
 | `src/pricing_experiment/` | Simultaneous round loop, stopping rule, and checkpoints |
-| `experiments/` | Fixed Gemini 3.7 reference design and commands |
-| `results/` | Price trajectories, figures, six-cell summary, and selected text records |
+| `experiments/` | Stationary and Arm2 designs, commands, exports, and plotting tools |
+| `results/` | Fifteen-run stationary results, Arm2 passive results, figures, and selected text records |
 | `tests/` | Market calibration and persistence checks |
 | `docs/` | Literature review, reading list, and detailed experiment report |
