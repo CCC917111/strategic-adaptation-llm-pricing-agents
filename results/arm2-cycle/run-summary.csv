@@ -1,0 +1,6 @@
+seed,rounds,mean_price_rounds_1_40,mean_price_rounds_41_80,final_mean_price,final_firm0_price,final_firm1_price,unchanged_price_transitions,transitions_at_most_0p05,total_within_firm_transitions
+0,80,1.659875,1.665875,1.6549999999999998,1.66,1.65,46,153,158
+1,80,1.908125,1.6395,1.645,1.67,1.62,65,156,158
+2,80,1.909375,1.710875,1.7,1.69,1.71,62,153,158
+3,80,1.6961249999999999,1.66,1.66,1.67,1.65,114,150,158
+4,80,1.6575,1.5605,1.55,1.53,1.57,31,143,158

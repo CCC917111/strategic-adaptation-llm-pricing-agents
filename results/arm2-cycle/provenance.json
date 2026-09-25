@@ -1,0 +1,49 @@
+{
+  "experiment": "arm2-deterministic-cycle-v1",
+  "started_at": "2026-09-20T02:18:04.065850+00:00",
+  "finished_at": "2026-09-20T05:28:25.771697+00:00",
+  "records": 800,
+  "transport": "YunZhuHub OpenAI-compatible chat completions",
+  "model_requested": "gemini-3.7-flash",
+  "temperature_requested": 1.2,
+  "thinking_requested": "high",
+  "seed_identifiers_requested": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "source_sha256": {
+    "pricing_agents/__init__.py": "bb54cfbb4d7b5b18445ae1c2153d95414e56629ec55c38dc9d08c9b199c11c6d",
+    "pricing_agents/agent.py": "99bbe9a1fdd9be29b1976bc394880fe80f3388f148a67077acd7366903595011",
+    "pricing_agents/clients.py": "8d88ffc14ac1bc8b7f80f9635d1fc92bb14da8a50685e94246ec7ee5f264b337",
+    "pricing_agents/cycle_prompts.py": "ce8b8a7c83a98fb42d5c8338995d5803ae1564a7e8abc1cf0b7fd2c5f2cf9bbd",
+    "pricing_agents/gemini_client.py": "d7473ff327ee03ee077ab53f4fe4786a13891e1aabff6a4aff9f66dc6ee00611",
+    "pricing_agents/models.py": "3058e234c241b19468ed5171a832cc18dad7389deeface3414372c0c54d04c74",
+    "pricing_agents/openai_compatible_client.py": "f31fe76f6e9ec47eb3cb7bd16873def567d0a42be3d97b3c1d79d8419d8d9487",
+    "pricing_agents/prompts.py": "7b5b0659f5868c048d1a3f9b9271607c51c9585639abef72682a747f2445bcfa",
+    "pricing_agents/resilience.py": "8cdca4af22a0aaa6daf7181b5a7ef47bdc81b7af2e4cc907afc2cedf798e2c30",
+    "pricing_experiment/__init__.py": "1afa65e56a276774406af8aca291be17e146c46eb1d5cdaefd73e4be80559c4e",
+    "pricing_experiment/convergence.py": "953e4139f78f3b4f9babd3dbb011b73d97844a35c39ab3f44ab918a54cb46fdb",
+    "pricing_experiment/persistence.py": "afae2b3b76092b3bed1317bf4db9fc8760109fc1e9ec50cbb3eb95ce8f4e1874",
+    "pricing_experiment/run_cycle_experiment.py": "3d51914d7d0907250dd9a1637d3b92b65fb202225d2e7c4c6dd60bfcbe341ca4",
+    "pricing_experiment/run_reference_experiment.py": "b2138e72bd676f5a9237449ebf35e2f0af94db6de13764284f303efa812bd147",
+    "pricing_experiment/runner.py": "8dceeb69c58481843097e647e6ac9726b645f5f581d80ae4d807e74ff98273c0",
+    "pricing_market/__init__.py": "924209fd512064b5d0aa79384efb9f33d6618d7e9d3498d0b7c91c9283d7434e",
+    "pricing_market/config.py": "c71280f75c6aec63c54bdaa9a283b3b41952f94cd30119fe70efa260fb2d1f2f",
+    "pricing_market/cycle.py": "45945183b87d775e5101deafb073984cc872df4734a9498b38ed25292c5eb7ca",
+    "pricing_market/market.py": "996f8d01f4663a1cb9e7e83baac3da94d707825182570feab9006cc8ec2e6cf3",
+    "pricing_regulator/__init__.py": "dab67e479745c1ae1ffa85829357cd1adeb2efc7eadf0b16db98347f0fa31630",
+    "pricing_regulator/regulator.py": "e195b3901221f34202d2786d6d6c1387d3f335ce3b48b46a15a446a6704db75b"
+  },
+  "raw_rounds_sha256": {
+    "seed0/rounds.jsonl": "475f573d9a495fa952632b7b2df9490c67fa98f13ee2b12b30d05fbdfcf11689",
+    "seed1/rounds.jsonl": "24324ca03828d1b32178085b54dcb8bde8b13c7cc578bd25cc338a547f3f0207",
+    "seed2/rounds.jsonl": "560663ece8a36cfde3887d6d167957236ace77e32d2a6621a44b224aacfab360",
+    "seed3/rounds.jsonl": "4b088a166242bea8024e4e7d13c2601adaf58b681a17731b3d1e2d80350aa6d6",
+    "seed4/rounds.jsonl": "7bc5643513154c55540d5e89d15f5c3c199eb0c9485578c3c2cc387efcb3c030"
+  },
+  "text_selection": "All firms and runs at rounds 11,31,51,71,80; retrospective, exhaustive for these events.",
+  "aggregation": "Two-firm mean, then non-overlapping five-round mean within each run; mean and sample SD (ddof=1) across five runs."
+}
