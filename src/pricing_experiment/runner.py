@@ -97,7 +97,9 @@ class GameRunner:
             )
             for firm_id in range(2)
         )
-        market_outcome = self.market.evaluate(executed_prices)
+        market_outcome = self.market.evaluate(
+            executed_prices, round_index=round_index
+        )
 
         result = ExperimentRound(
             round_index=round_index,
