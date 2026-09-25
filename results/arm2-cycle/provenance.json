@@ -3,7 +3,7 @@
   "started_at": "2026-09-20T02:18:04.065850+00:00",
   "finished_at": "2026-09-20T05:28:25.771697+00:00",
   "records": 800,
-  "transport": "YunZhuHub OpenAI-compatible chat completions",
+  "transport": "OpenAI-compatible chat completions",
   "model_requested": "gemini-3.7-flash",
   "temperature_requested": 1.2,
   "thinking_requested": "high",
