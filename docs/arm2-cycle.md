@@ -67,7 +67,22 @@ Five runs are specified for each mode. Run identifiers 0–4 are also sent in th
 
 ## Available evidence and remaining comparisons
 
-The first five passive runs completed all 80 rounds. Their 800 firm-round records have been checked against model responses and recalculated market outcomes. Revision and veto use the same dynamic specification; their results should be compared once those cells finish.
+All fifteen runs (five per mode) completed the 80-round horizon in the local experiment archives. The [public data release](../results/README.md#arm2-dynamic-market-data) currently contains the five passive runs only: 800 firm-round price records, five run summaries, sixteen five-round aggregates, and fifty selected text records. Revision and veto use the same dynamic specification; their code is included, but their result records are not part of this release.
+
+### Source versions
+
+The experimental source snapshot was published before the entry points were consolidated. The current single entry point is `run_cycle_oversight`; `--modes passive` covers the former passive-only command. The shared JSON writer now lives in `persistence.py`. These changes leave the demand, prompts, and oversight calculations unchanged. Historical archives retain the original source and source hashes; resume them with their archived code.
+
+The earlier passive batch used a version of `cycle_prompts.py` without the revision-request block. Both versions produce identical prompts when no revision is requested, so this addition does not change passive prompts.
+
+The SHA-256 recorded for `cycle_prompts.py` in [provenance.json](../results/arm2-cycle/provenance.json) is the historical passive source hash, not the hash of the later published file:
+
+- Passive archive: `ce8b8a7c83a98fb42d5c8338995d5803ae1564a7e8abc1cf0b7fd2c5f2cf9bbd`.
+- Published revision-capable version: `617d6d89290920b6ae1e63cc19ad918d8949aab0618fecaf80d0651a51b99597`.
+
+The passive provenance is retained unchanged to identify the code actually used for those records.
+
+### Remaining comparisons
 
 The older stationary runs provide historical context. Their market size, horizons, and some API settings differ from Arm2, so they are not a controlled estimate of the effect of cycling demand. A stationary market at size 100 with matched settings would be an additional control.
 
