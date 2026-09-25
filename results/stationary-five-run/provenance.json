@@ -1,0 +1,135 @@
+{
+  "experiment": "stationary-market five-run descriptive summary",
+  "run_ids": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "modes": [
+    "passive",
+    "revision",
+    "veto"
+  ],
+  "records": 1330,
+  "market_rounds": 665,
+  "common_rounds": [
+    1,
+    40
+  ],
+  "source_files": [
+    {
+      "run": 0,
+      "mode": "passive",
+      "rounds": 40,
+      "rounds_sha256": "62a62f008ce4e606584b944711e2223acf6f24a776c4bbb5c68873d2101d5339",
+      "manifest_sha256": "6a6eccd1f4e26210656cb2e141c6b934dd89adc1264ab15705383f9038a4394a"
+    },
+    {
+      "run": 0,
+      "mode": "revision",
+      "rounds": 40,
+      "rounds_sha256": "d1fc62cd6cc488dd4e4c5f52a8fb1d282b40e94befd6141dd6608005bb36a548",
+      "manifest_sha256": "445b91b0f97c4f4059a848651b1374e3867ddb35828e1760514ddbb14f15e520"
+    },
+    {
+      "run": 0,
+      "mode": "veto",
+      "rounds": 40,
+      "rounds_sha256": "4d204a1e1958539c07988dba37dd354e4c5135ef98f5e19dbb0d338cea81e5dc",
+      "manifest_sha256": "25c9cb11a9f183657d1052bb3ba8f4913e23bd8d9cf340321d8d65663b45eff7"
+    },
+    {
+      "run": 1,
+      "mode": "passive",
+      "rounds": 40,
+      "rounds_sha256": "dabc9f00b3ed9bb3028ba945a3e945e7058d5eedf3e18a4ebcb275674695eb8a",
+      "manifest_sha256": "31345d0908a9cc0c1446af58045a2401f188c20475b5f2e5cbc4d892f08a5d07"
+    },
+    {
+      "run": 1,
+      "mode": "revision",
+      "rounds": 55,
+      "rounds_sha256": "28ad3aa763a82d74bb500e64d7ed896bbb8568281412d4afa27285640176e482",
+      "manifest_sha256": "bb6b643664fd6bca3e43e1426e31f771b0c4cd86b25fec854512ff4abd952af0"
+    },
+    {
+      "run": 1,
+      "mode": "veto",
+      "rounds": 45,
+      "rounds_sha256": "b3eb190ac2e92de5663d4dad73618ca914c869e9349031ebdd710e542358431b",
+      "manifest_sha256": "15828790d2be99764324836743806c64249abbec18d2ccb66399411fa74dc6c2"
+    },
+    {
+      "run": 2,
+      "mode": "passive",
+      "rounds": 40,
+      "rounds_sha256": "2f08c5e4585641f9b65feea775a3c0696c048e15f29ac3e80a65f9997fb67a8e",
+      "manifest_sha256": "9a5f4d98bce764a3e83c23e2df02994177f8561fae4b758780910b30d64f099d"
+    },
+    {
+      "run": 2,
+      "mode": "revision",
+      "rounds": 40,
+      "rounds_sha256": "30023f27d3ab310ee6dbf152dee1cf3d6f841c2dcc57effb8c6a12147f5d4664",
+      "manifest_sha256": "33cb10d63c1df64e25b2f17086ad4f48b395d19c0e0cafff9cda88c1080e6bfc"
+    },
+    {
+      "run": 2,
+      "mode": "veto",
+      "rounds": 55,
+      "rounds_sha256": "6bdf35951e5b6dcca143c321c14dcc2596b757da19c83f9e4d11ee1811f45deb",
+      "manifest_sha256": "25cefc399b813d3db42f652aea6883d9bfa8b8ad4ff888b9c21fdd699ac41478"
+    },
+    {
+      "run": 3,
+      "mode": "passive",
+      "rounds": 55,
+      "rounds_sha256": "14ecb9e9c0e9ab00cd79549da0bb8579a451766f08b1bcc512218987a6165c8c",
+      "manifest_sha256": "d74f30af41f82c406fdb7ed1a0470e5c0e2af421bcf6fb30c2189597f2b67c65"
+    },
+    {
+      "run": 3,
+      "mode": "revision",
+      "rounds": 55,
+      "rounds_sha256": "96b478e48d3e8d235f1287b7e0baa514fc2a60ac7c4e1c53bd58593c1a372942",
+      "manifest_sha256": "a95063255bd1ba5f4c3cd06da09d2a335e55c53a39c5f6786ef76dc79e9fdc6f"
+    },
+    {
+      "run": 3,
+      "mode": "veto",
+      "rounds": 40,
+      "rounds_sha256": "e9e11b4351bfb0040d3c5b67498f9d59357112e644bf24fcc90ae403cef20f37",
+      "manifest_sha256": "c7fee1e10f094cf209f245d723e7a9972e588d55af0171a31bfe369a0842802d"
+    },
+    {
+      "run": 4,
+      "mode": "passive",
+      "rounds": 40,
+      "rounds_sha256": "40235313847684b94a83785c6b89b93fa4388c7f65508c20052c5063d626130d",
+      "manifest_sha256": "9bf5d6b2ec1d0a7423c014b84cbc13f5ab3be866be8a72a3b32cd9c91a8f41ef"
+    },
+    {
+      "run": 4,
+      "mode": "revision",
+      "rounds": 40,
+      "rounds_sha256": "d27a033c3a6363c7658ba8a2d8df871a920eba7a15a5cff2a02b4afd57fed1b1",
+      "manifest_sha256": "6f9fe0cf25fb5253f6956e568de5f21a69c5ed83cd2e7aa6a8c696c358ad0076"
+    },
+    {
+      "run": 4,
+      "mode": "veto",
+      "rounds": 40,
+      "rounds_sha256": "6915e3c910b710a60808175e0792915633f42e64e055eb04f61cea673ddf57ef",
+      "manifest_sha256": "faa2d6fedd27de9bbbf068f41c2971c2695a4e547e240a1037db08f7b54d1e2a"
+    }
+  ],
+  "aggregation": "Two-firm mean per round, then trailing five-round mean within each run; sample SD (ddof=1) across five runs. No endpoint padding.",
+  "interpretation": "Completed historical runs pooled descriptively across batches; SD is between-run dispersion, not a confidence interval or a treatment-effect estimate.",
+  "proposal_movement_round11_onward": {
+    "transitions": 1030,
+    "unchanged": 636,
+    "at_most_0p05": 1015
+  }
+}
