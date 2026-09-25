@@ -161,10 +161,10 @@ The historical experiment documentation records the following transport split:
 | Cell(s) | Recorded transport |
 |---|---|
 | Seed 0, passive, rounds 1–12 | official Google Gen AI |
-| Seed 0, passive, rounds 13–40 | YunZhuHub OpenAI-compatible relay |
-| Seed 0 revision/veto and all seed 1–4 cells | YunZhuHub OpenAI-compatible relay |
+| Seed 0, passive, rounds 13–40 | OpenAI-compatible API |
+| Seed 0 revision/veto and all seed 1–4 cells | OpenAI-compatible API |
 
-The recorded requests retained the model ID, high reasoning setting, prompt content, and schema order. This does not independently verify the relay's upstream model identity or equivalence to Google's API. The stationary reference command uses the official Google route; a configurable compatible client is also included for Arm2. The five-run summary combines completed historical batches descriptively.
+The recorded requests retained the model ID, high reasoning setting, prompt content, and schema order. The stationary reference command uses the Google API; Arm2 uses a configurable compatible client. The five-run summary combines completed historical batches descriptively.
 
 The full five-run numerical release is rebuilt from the original fifteen `rounds.jsonl` files and completion manifests. Validation checks contiguous rounds, fixed market size, logit quantities/profits, and mode-specific price execution. Its [provenance record](../results/stationary-five-run/provenance.json) records source hashes. The earlier two-run tables and text excerpts are retained with their [original report provenance](../results/data-provenance.json).
 

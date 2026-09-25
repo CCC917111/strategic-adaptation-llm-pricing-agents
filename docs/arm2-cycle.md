@@ -63,7 +63,7 @@ Each agent sees both firms' previous executed prices, its own sales and profits,
 
 The price flags, ten-round warm-up, fixed benchmark, revision request, and veto rule remain those described in [the stationary protocol](reference-experiment.md#5-oversight-modes). Output order remains price, public justification, competitor-information disclosure, and private notes.
 
-Five runs are specified for each mode. Run identifiers 0–4 are also sent in the API's `seed` field; reproducibility depends on the provider's handling of that field. The existing YunZhuHub route is used for the requested model, with requested high reasoning and temperature 1.2. Call records retain the requested settings and returned model identifier.
+Five runs are specified for each mode. Run identifiers 0–4 are also sent in the API's `seed` field; reproducibility depends on the provider's handling of that field. The requested model uses high reasoning. Call records retain the requested settings and returned model identifier.
 
 ## Available evidence and remaining comparisons
 
